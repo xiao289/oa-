@@ -1,0 +1,25 @@
+package com.dao;
+
+import com.bean.Room;
+
+import java.util.List;
+
+public interface RoomMapper {
+    int deleteByPrimaryKey(Integer id);
+
+    int insert(Room record);
+
+    int insertSelective(Room record);
+
+    Room selectByPrimaryKey(Integer id);
+
+    int updateByPrimaryKeySelective(Room record);
+
+    int updateByPrimaryKey(Room record);
+
+    List<Room> queryall();
+    List<Room> querymany(int[] roomids);
+    int deletemany(int[] roomids);
+    Room querybyroomname(String roomname);
+
+}

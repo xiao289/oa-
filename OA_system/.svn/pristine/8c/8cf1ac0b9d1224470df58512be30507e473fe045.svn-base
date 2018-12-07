@@ -1,0 +1,64 @@
+<%@ page isELIgnored="false" contentType="text/html;charset=UTF-8" language="java" %>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<!doctype html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+
+    <link rel="stylesheet" href="css/login.css">
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+	<title>后台登陆</title>
+</head>
+<body>
+	<div id="login_top">
+		<div id="welcome">
+			欢迎使用OA系统
+		</div>
+		<div id="back">
+			
+		</div>
+	</div>
+	<div id="login_center">
+		<div id="login_area">
+			<div id="login_form">
+
+				<form action="login" method="post" name="login">
+					<div id="login_tip">
+						用户登录&nbsp;&nbsp;UserLogin
+					</div>
+					<div><input type="text" name="loginname" id="name" class="username"></div>
+					<div><input type="text" name="password" id="pass" class="pwd"></div>
+					<div id="btn_area">
+						<input type="submit" name="submit" id="sub_btn" onclick="xinxi()" value="登&nbsp;&nbsp;录">&nbsp;&nbsp;
+						<input type="text" name="yanzheng" class="verify">
+						<img src="/getyanzheng" alt="" name="yanzheng" id="img" onclick="b()" width="80" height="40">
+					</div>
+					<script type="text/javascript">
+                        function b() {
+
+                            document.getElementById("img").src="/getyanzheng?num="+Math.random();
+
+                        }
+					</script>
+                    <script language="JavaScript">
+                       function xinxi() {
+                          if(login.loginname.value==""){
+                              alert("用户不能为空")
+                          }else
+                        if(login.password.value==""){
+                            alert("密码不能为空")
+                        }else if(login.yanzheng.value==""){
+                            alert("验证码不能为空")
+                        }
+                       }
+                    </script>
+				</form>
+			</div>
+		</div>
+	</div>
+	<div id="login_bottom">
+		版权所有
+	</div>
+</body>
+</html>

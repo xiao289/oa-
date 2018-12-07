@@ -1,0 +1,25 @@
+package com.service;
+
+import com.bean.RoomReserve;
+import com.github.pagehelper.PageInfo;
+
+import java.util.List;
+
+public interface RoomReserveService {
+    int deleteByPrimaryKey(Integer id);
+
+    int insert(RoomReserve record);
+
+    int insertSelective(RoomReserve record);
+
+    RoomReserve selectByPrimaryKey(Integer id);
+
+    int updateByPrimaryKeySelective(RoomReserve record);
+
+    int updateByPrimaryKey(RoomReserve record);
+    PageInfo queryall(int index,int size,String roomname,String yuname,int type);
+
+    int deletemany(int[] reserveids);
+
+    List querynany(int[] reserveids);
+}

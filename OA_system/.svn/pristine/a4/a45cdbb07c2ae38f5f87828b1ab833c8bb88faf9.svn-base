@@ -1,0 +1,45 @@
+package com.web;
+
+import com.bean.Announce;
+import com.github.pagehelper.PageInfo;
+import com.service.AnnounceService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+/*
+    通告
+ */
+
+@Controller
+public class AnnounceController {
+
+    @Autowired
+    private AnnounceService announceService;
+
+    //查询+模糊查
+    @RequestMapping("/resource/tonggao/demo1/selectlist")
+    public String selectlist(String title, String starttime, String endtime,
+                                @RequestParam(value="index", defaultValue = "1") int pageindex,
+                                ModelMap map,
+                                @RequestParam(value="size",defaultValue = "3") int size){
+        //设置分页
+        PageInfo pageInfo=announceService.selectall(title,starttime,endtime,pageindex,size);
+        pageInfo.setPageSize(size);
+        map.put("pi",pageInfo);
+        map.put("title",title);
+        map.put("starttime",starttime);
+        map.put("endtime",endtime);
+        return "/resource/tonggao/demo1/list";
+    }
+
+    //添加
+    @RequestMapping("/resource/tonggao/demo1/addtonggao")
+    public String addtonggao(Announce announce){
+        announceService.insertSelective(announce);
+        return "redirect:/resource/tonggao/demo1/selectlist";
+    }
+
+}

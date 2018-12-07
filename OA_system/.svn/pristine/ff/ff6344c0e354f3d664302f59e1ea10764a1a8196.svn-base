@@ -1,0 +1,234 @@
+package com.web;
+
+import com.bean.Log;
+import com.bean.Room;
+import com.bean.User;
+import com.github.pagehelper.PageInfo;
+import com.service.LogService;
+import com.service.RoomReserveService;
+import com.service.RoomService;
+import com.util.LogUtil;
+import com.util.RoomExcelUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+
+@Controller
+public class RoomController {
+
+
+    @Autowired
+    private RoomService roomService;
+    @Autowired
+    private LogService logService;
+    @Autowired
+    private RoomReserveService roomReserveService;
+
+    /**
+     * 查询所有的会议室信息，包括分页
+     * @param index
+     * @param size
+     * @param modelMap
+     * @return
+     */
+    @RequestMapping("/resource/xingzheng/room/queryall")
+    public String queryall(@RequestParam(value = "index",defaultValue = "1") int index,
+                           @RequestParam(defaultValue = "5") int size,
+                           ModelMap modelMap){
+        PageInfo queryall = roomService.queryall(index, size);
+        modelMap.put("page",queryall);
+        modelMap.put("size",size);
+        return "/resource/xingzheng/room/list";
+    }
+
+    /**
+     * 添加会议室信息
+     * @param room
+     * @param response
+     */
+    @RequestMapping("/xingzheng/room/add")
+    public void add(Room room, HttpServletResponse response, HttpServletRequest request){
+        User user = (User) request.getSession().getAttribute("loginname");
+
+        Log log = LogUtil.setterLog(user.getLoginname(), null, "添加会议室信息");
+        logService.insertSelective(log);
+        int i = roomService.insertSelective(room);
+        response.setContentType("text/html;charset=utf-8");
+        try {
+            PrintWriter writer = response.getWriter();
+            if(i>0){
+                writer.write("<script>alert('添加成功');location.href='/resource/xingzheng/room/queryall'</script>");
+            }else{
+                writer.write("<script>alert('添加失败');location.href='/resource/xingzheng/room/add.jsp'</script>");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
+     * 修改会议室信息
+     * @param roomid
+     * @param modelMap
+     * @return
+     */
+    @RequestMapping("/xingzheng/room/update")
+    public String update(int roomid,ModelMap modelMap){
+        Room room = roomService.selectByPrimaryKey(roomid);
+        modelMap.put("room",room);
+        return "/resource/xingzheng/room/edit";
+    }
+    @RequestMapping("/xingzheng/room/update1")
+    public void update1(Room room,HttpServletResponse response,HttpServletRequest request){
+        User user = (User) request.getSession().getAttribute("loginname");
+
+        Log log = LogUtil.setterLog(user.getLoginname(), null, "更新会议室信息");
+        logService.insertSelective(log);
+        int i = roomService.updateByPrimaryKeySelective(room);
+        response.setContentType("text/html;charset=utf-8");
+        try {
+            PrintWriter writer = response.getWriter();
+            if(i>0){
+                writer.write("<script>alert('修改成功');location.href='/resource/xingzheng/room/queryall'</script>");
+            }else{
+                writer.write("<script>alert('修改失败');location.href='/xingzheng/room/update'</script>");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 删除会议室信息
+     * @param id
+     * @param response
+     */
+    @RequestMapping("/xingzheng/room/delete")
+    public void delete(int id,HttpServletResponse response,HttpServletRequest request){
+        User user = (User) request.getSession().getAttribute("loginname");
+
+        Log log = LogUtil.setterLog(user.getLoginname(), null, "删除会议室信息");
+        logService.insertSelective(log);
+
+        response.setContentType("text/html;charset=utf-8");
+        List yanzhengroom = roomReserveService.yanzhengroom(id);
+        try {
+            PrintWriter writer = response.getWriter();
+            if(yanzhengroom.size()>0){
+                writer.write("<script>alert('删除失败,会议室被占用');location.href='/resource/xingzheng/room/queryall'</script>");
+            }else{
+                int i = roomService.deleteByPrimaryKey(id);
+                if(i>0){
+                    writer.write("<script>alert('删除成功');location.href='/resource/xingzheng/room/queryall'</script>");
+                }else{
+                    writer.write("<script>alert('删除失败');location.href='/resource/xingzheng/room/queryall'</script>");
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 批量导出会议室信息
+     * @param roomids
+     * @param response
+     */
+    @RequestMapping("/xingzheng/room/daochu")
+    public void daochu(int[] roomids,HttpServletResponse response,HttpServletRequest request){
+        User user = (User) request.getSession().getAttribute("loginname");
+
+        Log log = LogUtil.setterLog(user.getLoginname(), null, "导出会议室信息");
+        logService.insertSelective(log);
+        List<Room> querynany = roomService.querynany(roomids);
+        RoomExcelUtil.headers=new String[]{"会议室编号","会议室门牌号","会议室名称"};
+        RoomExcelUtil.cellcount=3;
+        RoomExcelUtil.createhead(3);
+        RoomExcelUtil.createother(querynany);
+        SimpleDateFormat simpleFormatter=new SimpleDateFormat("yyyyMMddhhmmss");
+        String date=simpleFormatter.format(new Date());
+
+        FileOutputStream outputStream=null;
+        try {
+            outputStream=new FileOutputStream("G:"+date+".xls");
+            RoomExcelUtil.export(outputStream);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }finally {
+            try {
+                outputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        response.setContentType("text/html;charset=utf-8");
+        try {
+            PrintWriter writer = response.getWriter();
+            writer.write("<script>alert('导出成功');location.href='/resource/xingzheng/room/queryall'</script>");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 批量删除会议室信息
+     * @param roomids
+     * @param response
+     */
+    @RequestMapping("/xingzheng/room/deleteall")
+    public void deteleall(int[] roomids,HttpServletResponse response,HttpServletRequest request){
+        User user = (User) request.getSession().getAttribute("loginname");
+        Log log = LogUtil.setterLog(user.getLoginname(), null, "批量删除会议室信息");
+        logService.insertSelective(log);
+        response.setContentType("text/html;charset=utf-8");
+        List piliangyanzheng = roomReserveService.piliangyanzheng(roomids);
+        try {
+            PrintWriter writer = response.getWriter();
+            if(piliangyanzheng.size()>0){
+                writer.write("<script>alert('删除失败,会议室被占用');location.href='/resource/xingzheng/room/queryall'</script>");
+            }else{
+                int i = roomService.deletemany(roomids);
+                if(i>0){
+                    writer.write("<script>alert('批量删除成功');location.href='/resource/xingzheng/room/queryall'</script>");
+                }else{
+                    writer.write("<script>alert('批量删除失败');location.href='/resource/xingzheng/room/queryall'</script>");
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 对添加会议室中，会议室名称的唯一性验证
+     * @param roomname
+     * @param response
+     * @return
+     */
+    @RequestMapping(value = "/xingzheng/room/yanzheng",produces = "text/html;charset=UTF-8")
+    @ResponseBody
+    public String yanzheng(String roomname,HttpServletResponse response){
+        int i = roomService.querybyroomname(roomname);
+        response.setContentType("text/html;charset=utf-8");
+        if(i>0){
+            return "该会议室已经存在，请重新输入";
+        }else{
+            return "该会议室还不存在，此名称可以使用";
+        }
+    }
+
+}

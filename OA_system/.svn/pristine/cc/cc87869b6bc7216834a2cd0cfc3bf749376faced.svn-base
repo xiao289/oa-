@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.TrafficMapper">
+    <resultMap id="BaseResultMap" type="com.bean.Traffic">
+        <id column="trafficid" jdbcType="INTEGER" property="trafficid" />
+        <result column="trafficname" jdbcType="VARCHAR" property="trafficname" />
+    </resultMap>
+
+    <select id="getall" resultMap="BaseResultMap">
+        select * from traffic
+    </select>
+
+    <sql id="Base_Column_List">
+    trafficid, trafficname
+  </sql>
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from traffic
+        where trafficid = #{trafficid,jdbcType=INTEGER}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from traffic
+    where trafficid = #{trafficid,jdbcType=INTEGER}
+  </delete>
+    <insert id="insert" parameterType="com.bean.Traffic">
+    insert into traffic (trafficid, trafficname)
+    values (#{trafficid,jdbcType=INTEGER}, #{trafficname,jdbcType=VARCHAR})
+  </insert>
+    <insert id="insertSelective" parameterType="com.bean.Traffic">
+        insert into traffic
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="trafficid != null">
+                trafficid,
+            </if>
+            <if test="trafficname != null">
+                trafficname,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="trafficid != null">
+                #{trafficid,jdbcType=INTEGER},
+            </if>
+            <if test="trafficname != null">
+                #{trafficname,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.bean.Traffic">
+        update traffic
+        <set>
+            <if test="trafficname != null">
+                trafficname = #{trafficname,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where trafficid = #{trafficid,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.bean.Traffic">
+    update traffic
+    set trafficname = #{trafficname,jdbcType=VARCHAR}
+    where trafficid = #{trafficid,jdbcType=INTEGER}
+  </update>
+</mapper>

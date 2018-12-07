@@ -1,0 +1,68 @@
+package com.web;
+
+import com.bean.Cachet;
+import com.bean.Dept;
+import com.bean.User;
+import com.service.CachetService;
+import com.service.DeptService;
+import com.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
+
+@Controller
+public class CBBController {
+    @Autowired
+    private CachetService cachetService;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private DeptService deptService;
+
+    /**
+     * 展示用章添加页面信息
+     * @param modelMap
+     * @param request
+     * @return
+     */
+    @RequestMapping("xingzheng/room/queryallchapter")
+    public String queryallchapter(ModelMap modelMap, HttpServletRequest request){
+        User user1 = (User) request.getSession().getAttribute("loginname");
+        Dept dept = deptService.selectByPrimaryKey(user1.getDeptid());
+        List list=new ArrayList();
+        list.add(dept);
+        user1.setDepts(list);
+        modelMap.put("loginname",user1);
+        //根据roleid来获取有权限额信息
+        List<User> admin = userService.querybyroleid(1);
+        modelMap.put("admins",admin);
+        return "/resource/xingzheng/chapter/list";
+    }
+
+    /**
+     * 添加用章管理
+     */
+    @RequestMapping("/xingzheng/chapter/add")
+    public void add(Cachet cachet,HttpServletResponse response){
+        int i = cachetService.insert(cachet);
+        response.setContentType("text/html;charset=utf-8");
+        try {
+            PrintWriter writer = response.getWriter();
+            if(i>0){
+                writer.write("<script>alert('添加用章成功');location.href='/resource/myself/demo1/getList'</script>");
+            }else{
+                writer.write("<script>alert('添加用章失败');location.href='/resource/myself/demo1/getList'</script>");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}

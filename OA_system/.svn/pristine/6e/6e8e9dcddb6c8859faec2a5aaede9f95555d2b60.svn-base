@@ -1,0 +1,102 @@
+package com.web;
+
+import com.bean.Leavex;
+import com.bean.Task;
+import com.github.pagehelper.PageInfo;
+import com.service.*;
+import com.util.LeavexExcelUtil;
+import com.util.TaskExcelUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+
+@Controller
+public class TaskController {
+
+    @Autowired
+    private LeavexService leavexService;
+    @Autowired
+    private DeptService deptService;
+    @Autowired
+    private AnnounceService announceService;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private TaskService taskService;
+    //获取任务详情
+    @RequestMapping("/resource/myself/demo4/getTask")
+    public String getTask(String starttime, String subtime, Integer type,
+                          @RequestParam(value="index", defaultValue = "1") int pageindex,
+
+                          @RequestParam(value="size",defaultValue = "2") int size, ModelMap map){
+
+        PageInfo pageInfo = taskService.findTaskList(starttime,subtime,type,pageindex,size,null,1);
+        List<Task> list = pageInfo.getList();
+        for (Task task : list) {
+            System.out.println(task.getName());
+        }
+        pageInfo.setPageSize(size);
+        map.put("pi",pageInfo);
+        map.put("starttime",starttime);
+        map.put("subtime",subtime);
+        map.put("type",type);
+        return "resource/myself/demo4/list";
+    }
+
+        //    批量导出
+        @RequestMapping("/resource/myself/demo4/daochu")
+        public void daochu(int[] single, HttpServletResponse response,
+                   @RequestParam(value="index", defaultValue = "1") int pageindex,
+
+                   @RequestParam(value="size",defaultValue = "2") int size){
+    PageInfo pg = taskService.findTaskList(null,null,null,pageindex,size,single,1);
+    List<Task> list=pg.getList();
+    TaskExcelUtil.headers=new String[]{"任务名称","发起时间","发起人","最后审批时间","状态"};
+    TaskExcelUtil.createhead(5);
+    TaskExcelUtil.createother(list);
+
+    SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyyMMddhhmmss");
+    String date= simpleDateFormat.format(new Date());
+    FileOutputStream out= null;
+    try {
+        out = new FileOutputStream("e:\\Task"+date+".xls");
+        TaskExcelUtil.export(out);
+    } catch (FileNotFoundException e) {
+        e.printStackTrace();
+    }finally{
+        try {
+            out.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    response.setContentType("text/html;charset=utf-8");
+    try {
+        PrintWriter out2=response.getWriter();
+        out2.print("<script>alert('导出成功');location.href='/resource/myself/demo1/getList'</script>");
+    } catch (IOException e) {
+        e.printStackTrace();
+        }
+    }
+
+    @RequestMapping("/resource/myself/demo4/deleteall")
+    public String deleteall(int[] single){
+
+        taskService.deletebyids(single);
+
+        return "redirect:/resource/myself/demo4/getTask";
+    }
+}

@@ -1,0 +1,141 @@
+﻿<%@ page isELIgnored="false" contentType="text/html;charset=UTF-8" language="java" %>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<!doctype html>
+ <html >
+ <head>
+   <meta charset="UTF-8">
+   <link rel="stylesheet" href="../../../css/common.css">
+   <link rel="stylesheet" href="../../../css/main.css">
+   <script type="text/javascript" src="../../../js/jquery.min.js"></script>
+   <script type="text/javascript" src="../../../js/colResizable-1.3.min.js"></script>
+   <script type="text/javascript" src="../../../js/common.js"></script>
+    <script type="text/javascript">
+    var q1 = 0,q2 = 0;
+    $(function() {
+
+        window.onload = function(){
+                $("#lujing").html("");
+                $("input[name=url]").prop("type","hidden");
+            }
+
+        $("[name=menuname]").blur(function() {
+        var name = $(this).val();
+        if (name==null || name == ''){
+            q1 = 0;
+        $("[name=menuname]").next().html("请输入菜单名");
+        } else{
+                $.ajax({
+                    url:"/resource/system/menu/checkmenuname",
+                    data:"menuname="+name,
+                    type:"post",
+                    dataType:"text",
+                    cache:false,
+                    success: function(rs) {
+                        if (rs == 'ok'){
+                            q1 = 1;
+                        }else{
+                            q1 = 0;
+                        }
+                        $("[name=menuname]").next().html(rs);
+                    }
+                })
+        }
+    })
+
+    $("[name=pid]").change(function() {
+        var ppid = $(this).val();
+        if (ppid == -1){
+            $("#lujing").html("");
+            $("input[name=url]").prop("type","hidden");
+            }else{
+                $("#lujing").html("路径：");
+            $("input[name=url]").prop("type","text");
+            }
+    })
+
+
+
+    })
+
+    function tijiao() {
+    if (q1 == 1){
+    document.forms[0].submit();
+    }
+    }
+
+
+    </script>
+</head>
+
+<body>
+  <div id="forms" class="mt10">
+        <div class="box">
+          <div class="box_border">
+            <div class="box_top"><b class="pl15">添加菜单</b></div>
+            <div class="box_center">
+              <form action="/resource/system/menu/addmenu" method="post" class="jqtransform">
+               <table class="form_table pt15 pb15" width="100%" border="0" cellpadding="0" cellspacing="0">
+                 <tr>
+                  <td class="td_right">菜单名称：</td>
+                  <td class=""> 
+                    <input type="text" name="menuname" class="input-text lh30" size="40"><span style="color: red"></span>
+                  </td>
+				  </tr>
+                <tr >
+                  <td class="td_right">父级菜单：</td>
+                  <td class="">
+ 
+                    <span class="fl">
+                      <div class="select_border"> 
+                        <div class="select_containers "> 
+                        <select name="pid" class="select">
+						<option value="-1" selected>顶级菜单</option>
+                        <c:forEach items="${umenu}" var="mu">
+                            <option value="${mu.id}">${mu.menuname}</option>
+                        </c:forEach>
+                        </select> 
+                        </div> 
+                      </div> 
+                    </span>
+                  </td>
+                 </tr>
+
+				 <tr>
+                  <td class="td_right"><span id="lujing">路径：</span></td>
+				  <td><input type="text" name="url" class="input-text lh30" size="40"></td>
+                </tr>
+                 <tr>
+                  <td class="td_right">状态：</td>
+                  <td class="">
+                    <input type="radio" name="state" value="0" checked> 启用
+                    <input type="radio" name="state" value="1"> 冻结
+                  </td>
+                 </tr>
+
+                    <input type="hidden" name="username" value="${loginname.loginname}">
+                    <input type="hidden" name="event" value="添加菜单">
+                    <tr>
+                    <td class="td_right">备注：</td>
+                    <td class="">
+                    <textarea name="remark" cols="30" rows="10" class="textarea">无</textarea>
+                    </td>
+                    </tr>
+
+                 <tr>
+                   <td class="td_right">&nbsp;</td>
+                   <td class="">
+                     <input type="button" name="button" onclick="tijiao()" class="btn btn82 btn_save2" value="保存">
+                    <input type="button" name="button" class="btn btn82 btn_res" onclick="location.href='javascript:history.go(-1)'" value="返回"> 
+                   </td>
+                 </tr>
+               </table>
+               </form>
+            </div>
+          </div>
+        </div>
+     </div>
+   </div> 
+</body>
+
+</html>

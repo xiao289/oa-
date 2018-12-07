@@ -1,0 +1,24 @@
+package com.service;
+
+import com.bean.Leavex;
+import com.github.pagehelper.PageInfo;
+
+public interface LeavexService {
+    int deleteByPrimaryKey(Integer id);
+
+    int insert(Leavex record);
+
+    int insertSelective(Leavex record);
+
+    Leavex selectByPrimaryKey(Integer id);
+
+    int updateByPrimaryKeySelective(Leavex record);
+
+    int updateByPrimaryKey(Leavex record);
+
+    //查询全部+模糊查
+    public PageInfo selectall(String starttime, String endtime,Integer type, int pageindex, int size,int[] ids,Integer userid);
+
+//    批量删除
+    int deletebyids(int[] ids);
+}

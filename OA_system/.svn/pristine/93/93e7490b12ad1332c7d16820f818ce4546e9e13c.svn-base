@@ -1,0 +1,61 @@
+package com.service.impl;
+
+import com.bean.Menu;
+import com.dao.MenuMapper;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import com.service.MenuService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@Service
+public class MenuServiceImpl implements MenuService {
+    @Autowired
+    private MenuMapper menuMapper;
+
+    @Override
+    public int deleteByPrimaryKey(Integer id) {
+        return 0;
+    }
+
+    @Override
+    public int insert(Menu record) {
+        return 0;
+    }
+
+    @Override
+    public int insertSelective(Menu record) {
+        return 0;
+    }
+
+    @Override
+    public Menu selectByPrimaryKey(Integer id) {
+        return null;
+    }
+
+    @Override
+    public int updateByPrimaryKeySelective(Menu record) {
+        return 0;
+    }
+
+    @Override
+    public int updateByPrimaryKey(Menu record) {
+        return 0;
+    }
+
+    @Override
+    public PageInfo findmenu(int pagesize, int size, String menuname) {
+        Map map = new HashMap();
+        map.put("menuname1",menuname);
+        PageHelper.startPage(pagesize,size);
+        List<Menu> list = menuMapper.findmenu(map);
+
+        PageInfo pageInfo = new PageInfo(list);
+        return pageInfo;
+    }
+}

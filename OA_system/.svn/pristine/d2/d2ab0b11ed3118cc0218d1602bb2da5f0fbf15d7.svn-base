@@ -1,0 +1,17 @@
+package com.service;
+
+import com.bean.Vcard;
+
+public interface VcardService {
+    int deleteByPrimaryKey(Integer id);
+
+    int insert(Vcard record);
+
+    int insertSelective(Vcard record);
+
+    Vcard selectByPrimaryKey(Integer id);
+
+    int updateByPrimaryKeySelective(Vcard record);
+
+    int updateByPrimaryKey(Vcard record);
+}

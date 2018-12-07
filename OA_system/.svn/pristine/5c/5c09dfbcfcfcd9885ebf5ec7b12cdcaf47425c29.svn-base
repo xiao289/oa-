@@ -1,0 +1,73 @@
+package com.service.impl;
+
+import com.bean.Task;
+import com.dao.TaskMapper;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import com.service.TaskService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@Service
+public class TaskServiceImpl implements TaskService {
+
+    @Autowired
+    private TaskMapper taskMapper;
+    @Override
+    public int deleteByPrimaryKey(Integer id) {
+        return 0;
+    }
+
+    @Override
+    public int insert(Task record) {
+        return 0;
+    }
+
+    @Override
+    public int insertSelective(Task record) {
+        return 0;
+    }
+
+    @Override
+    public Task selectByPrimaryKey(Integer id) {
+        return taskMapper.selectByPrimaryKey(id);
+    }
+
+    @Override
+    public int updateByPrimaryKeySelective(Task record) {
+        return 0;
+    }
+
+    @Override
+    public int updateByPrimaryKey(Task record) {
+        return 0;
+    }
+
+    @Override
+    public PageInfo findTaskList(Date startTime, Date subTime, Integer type,int pageindex,int size, int userId) {
+
+        Map map=new HashMap();
+        map.put("startTime",startTime);
+        map.put("subTime",subTime);
+        map.put("type",type);
+        PageHelper.startPage(pageindex,size);
+        List list= taskMapper.findTaskList(map);
+        PageInfo pi=new PageInfo(list);
+        return pi;
+
+    }
+
+
+    @Override
+    public int updateState(int taskId, int state) {
+        Map map=new HashMap();
+        map.put("taskId",taskId);
+        map.put("state",state);
+        return taskMapper.updateState(map);
+    }
+}

@@ -1,0 +1,74 @@
+package com.util;
+
+import com.github.pagehelper.PageInfo;
+
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.JspWriter;
+import javax.servlet.jsp.tagext.SimpleTagSupport;
+import java.io.IOException;
+
+public class SystemFenYeUtil extends SimpleTagSupport {
+
+    //请求地址
+    private String url;
+    //保存分页得数据
+    private PageInfo pageInfo;
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public PageInfo getPageInfo() {
+        return pageInfo;
+    }
+
+    public void setPageInfo(PageInfo pageInfo) {
+        this.pageInfo = pageInfo;
+    }
+
+    @Override
+    public void doTag() throws JspException, IOException {
+        JspWriter out = this.getJspContext().getOut();
+        StringBuffer stringBuffer = new StringBuffer();
+        stringBuffer.append("<li class='first-child'><a href='"+url+"&index=1&size="+pageInfo.getPageSize()+"'>首页</a></li>&nbsp;");
+        stringBuffer.append("<li><a href='"+url+"&index="+(pageInfo.getPrePage()==0?1:pageInfo.getPrePage())+"&size="+pageInfo.getPageSize()+"'>上一页</a></li>&nbsp;");
+        for (int i = 1; i < pageInfo.getPages() + 1; i++){
+           /* if (i > 5 && i < pageInfo.getPages() - 2){
+                stringBuffer.append("&nbsp;&nbsp;...............&nbsp;&nbsp;");
+                stringBuffer.append("<a href='"+url+"&index="+(i - 2)+"&size="+pageInfo.getPageSize()+"'>"+(i - 2)+"</a>&nbsp;");
+                stringBuffer.append("<a href='"+url+"&index="+(i - 1)+"&size="+pageInfo.getPageSize()+"'>"+(i - 1)+"</a>&nbsp;");
+                stringBuffer.append("<a href='"+url+"&index="+i+"&size="+pageInfo.getPageSize()+"'>"+i+"</a>&nbsp;");
+                stringBuffer.append("<a href='"+url+"&index="+(i + 1)+"&size="+pageInfo.getPageSize()+"'>"+(i + 1)+"</a>&nbsp;");
+                stringBuffer.append("<a href='"+url+"&index="+(i + 2)+"&size="+pageInfo.getPageSize()+"'>"+(i + 2)+"</a>&nbsp;");
+                stringBuffer.append("&nbsp;&nbsp;...............&nbsp;&nbsp;");
+            }else{*/
+                stringBuffer.append("<li class='active'><a href='"+url+"&index="+i+"&size="+pageInfo.getPageSize()+"'>"+i+"</a></li>&nbsp;");
+//            }
+
+        }
+        stringBuffer.append("<li><a href='"+url+"&index="+(pageInfo.getNextPage()==0?pageInfo.getPages():pageInfo.getNextPage())+"&size="+pageInfo.getPageSize()+"'>下一页</a></li>&nbsp;");
+        stringBuffer.append("<li><a href='"+url+"&index="+pageInfo.getPages()+"&size="+pageInfo.getPageSize()+"'>尾页</a></li>&nbsp;");
+        stringBuffer.append("<li class='first-child'><span>共"+pageInfo.getTotal()+"条数据</span></li>&nbsp;");
+        stringBuffer.append("<li class='first-child'><span>每页显示&nbsp;");
+        /*stringBuffer.append("<select name='num'>");
+        if (pageInfo.getPageSize() == 5){
+            stringBuffer.append("<option value ='5' selected>5</option><option value ='10'>10</option><option value ='15'>15</option>");
+        }else if (pageInfo.getPageSize() == 10){
+            stringBuffer.append("<option value ='5' >5</option><option value ='10' selected>10</option><option value ='15'>15</option>");
+        }if (pageInfo.getPageSize() == 15){
+            stringBuffer.append("<option value ='5' >5</option><option value ='10'>10</option><option value ='15' selected>15</option>");
+        }
+        stringBuffer.append("</select>");*/
+        stringBuffer.append(pageInfo.getPageNum()+"/"+ pageInfo.getPages()+"</span></li>");
+
+        out.print(stringBuffer.toString());
+
+
+
+        super.doTag();
+    }
+}

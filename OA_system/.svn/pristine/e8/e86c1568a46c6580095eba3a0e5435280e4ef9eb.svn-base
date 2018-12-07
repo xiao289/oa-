@@ -1,0 +1,87 @@
+package com.service.impl;
+
+import com.bean.Leavex;
+import com.dao.LeavexMapper;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import com.service.LeavexService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@Service
+public class LeavexServiceImpl implements LeavexService {
+    @Autowired
+    private LeavexMapper leavexMapper;
+    @Override
+    public int deleteByPrimaryKey(Integer id) {
+        return leavexMapper.deleteByPrimaryKey(id);
+    }
+
+    @Override
+    public int insert(Leavex record) {
+        return 0;
+    }
+
+    @Override
+    public int insertSelective(Leavex record) {
+        return 0;
+    }
+
+    @Override
+    public Leavex selectByPrimaryKey(Integer id) {
+        return leavexMapper.selectByPrimaryKey(id);
+    }
+
+    @Override
+    public int updateByPrimaryKeySelective(Leavex record) {
+        return leavexMapper.updateByPrimaryKeySelective(record);
+    }
+
+    @Override
+    public int updateByPrimaryKey(Leavex record) {
+        return 0;
+    }
+
+    @Override
+    public PageInfo selectall(String starttime, String endtime, Integer type, int pageindex, int size,int[] ids,Integer userid) {
+        Map map=new HashMap();
+
+        map.put("starttime",starttime);
+        map.put("endtime",endtime);
+        map.put("type",type);
+        map.put("ids",ids);
+        map.put("userid",userid);
+
+        PageHelper.startPage(pageindex,size);
+        List list= leavexMapper.selectall(map);
+        PageInfo pi=new PageInfo(list);
+        return pi;
+    }
+
+    @Autowired
+    private DataSourceTransactionManager tx;//事务
+    @Override
+    public int deletebyids(int[] ids) {
+
+        DefaultTransactionDefinition ddf=new DefaultTransactionDefinition();
+        TransactionStatus status=tx.getTransaction(ddf);
+
+
+        try {
+            for (int id : ids) {
+                deleteByPrimaryKey(id);
+            }
+            tx.commit(status);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+}

@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.AnnounceMapper">
+  <resultMap id="BaseResultMap" type="com.bean.Announce">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="title" jdbcType="VARCHAR" property="title" />
+    <result column="startTime" jdbcType="DATE" property="starttime" />
+    <result column="endTime" jdbcType="DATE" property="endtime" />
+    <result column="suntime" jdbcType="DATE" property="suntime" />
+    <result column="userId" jdbcType="INTEGER" property="userid" />
+    <result column="content" jdbcType="VARCHAR" property="content" />
+    <result column="state" jdbcType="VARCHAR" property="state" />
+    <association property="user" javaType="com.bean.User">
+      <id column="id" jdbcType="INTEGER" property="id" />
+      <result column="name" jdbcType="VARCHAR" property="name" />
+    </association>
+  </resultMap>
+
+  <select id="selectall" resultMap="BaseResultMap" parameterType="map">
+    SELECT * from announce a,`user` u
+    WHERE a.userId=u.id
+    <if test="title!=null and title!=''">
+      and a.title like '%${title}%'
+    </if>
+    <if test="starttime!=null and starttime!=''">
+      and a.startTime &gt;='${starttime}'
+    </if>
+    <if test="endtime!=null and endtime!=''">
+      and a.endTime &lt;='${endtime}'
+    </if>
+  </select>
+
+
+  <sql id="Base_Column_List">
+    id, title, startTime, endTime, suntime, userId, content
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from announce
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from announce
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.bean.Announce">
+    insert into announce (id, title, startTime, 
+      endTime, suntime, userId, 
+      content)
+    values (#{id,jdbcType=INTEGER}, #{title,jdbcType=VARCHAR}, #{starttime,jdbcType=DATE}, 
+      #{endtime,jdbcType=DATE}, #{suntime,jdbcType=DATE}, #{userid,jdbcType=INTEGER}, 
+      #{content,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.bean.Announce">
+    insert into announce
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="title != null">
+        title,
+      </if>
+      <if test="starttime != null">
+        startTime,
+      </if>
+      <if test="endtime != null">
+        endTime,
+      </if>
+      <if test="suntime != null">
+        suntime,
+      </if>
+      <if test="userid != null">
+        userId,
+      </if>
+      <if test="content != null">
+        content,
+      </if>
+      <if test="state != null">
+        state,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="title != null">
+        #{title,jdbcType=VARCHAR},
+      </if>
+      <if test="starttime != null">
+        #{starttime,jdbcType=DATE},
+      </if>
+      <if test="endtime != null">
+        #{endtime,jdbcType=DATE},
+      </if>
+      <if test="suntime != null">
+        #{suntime,jdbcType=DATE},
+      </if>
+      <if test="userid != null">
+        #{userid,jdbcType=INTEGER},
+      </if>
+      <if test="content != null">
+        #{content,jdbcType=VARCHAR},
+      </if>
+      <if test="state != null">
+        #{state,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.bean.Announce">
+    update announce
+    <set>
+      <if test="title != null">
+        title = #{title,jdbcType=VARCHAR},
+      </if>
+      <if test="starttime != null">
+        startTime = #{starttime,jdbcType=DATE},
+      </if>
+      <if test="endtime != null">
+        endTime = #{endtime,jdbcType=DATE},
+      </if>
+      <if test="suntime != null">
+        suntime = #{suntime,jdbcType=DATE},
+      </if>
+      <if test="userid != null">
+        userId = #{userid,jdbcType=INTEGER},
+      </if>
+      <if test="content != null">
+        content = #{content,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.bean.Announce">
+    update announce
+    set title = #{title,jdbcType=VARCHAR},
+      startTime = #{starttime,jdbcType=DATE},
+      endTime = #{endtime,jdbcType=DATE},
+      suntime = #{suntime,jdbcType=DATE},
+      userId = #{userid,jdbcType=INTEGER},
+      content = #{content,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

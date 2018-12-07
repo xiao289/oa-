@@ -1,0 +1,163 @@
+package com.web;
+
+import com.bean.*;
+import com.github.pagehelper.PageInfo;
+import com.service.*;
+import com.util.LeavexExcelUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.bind.support.SessionStatus;
+
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+
+@Controller
+@SessionAttributes({})
+public class LeavexController {
+
+    @Autowired
+    private LeavexService leavexService;
+    @Autowired
+    private DeptService deptService;
+    @Autowired
+    private AnnounceService announceService;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private TaskService taskService;
+
+    @RequestMapping("/resource/myself/demo1/getList")
+    public String getList(String starttime, String endtime,Integer type,
+                          @RequestParam(value="index", defaultValue = "1") int pageindex,
+                          HttpSession session,
+                          @RequestParam(value="size",defaultValue = "2") int size,ModelMap map){
+
+        User u1 = (User) session.getAttribute("u1");
+        PageInfo pageInfo=leavexService.selectall(starttime,endtime,type,pageindex,size,null,1);
+        Task task = taskService.selectLeaveTask(1);
+        pageInfo.setPageSize(size);
+        map.put("task",task);
+        map.put("pi",pageInfo);
+        map.put("starttime",starttime);
+        map.put("endtime",endtime);
+        map.put("type",type);
+
+        return "/resource/myself/demo1/list";
+    }
+
+//    查看任务详情
+    @RequestMapping("/resource/myself/demo1/getLeavex")
+    public String getLeavex(Integer id,Integer type,Integer userid,ModelMap map){
+
+
+        Leavex leavex = leavexService.findShenQing(id, type, userid);;
+        map.put("leavex",leavex);
+        Task task1 = taskService.findtask1(type,userid);
+        map.put("task1",task1);
+
+        return "/resource/myself/demo1/look";
+    }
+
+
+
+
+//    导出请假单
+    @RequestMapping("/resource/myself/demo1/daochu")
+    public void daochu(int[] single, HttpServletResponse response,
+                       @RequestParam(value="index", defaultValue = "1") int pageindex,
+
+                       @RequestParam(value="size",defaultValue = "2") int size){
+        PageInfo pg = leavexService.selectall(null,null,null,pageindex,size,single,1);
+        List<Leavex> list=pg.getList();
+
+        LeavexExcelUtil.headers=new String[]{"id","starttime","endtime","请假天数","类型","批注","状态"};
+        LeavexExcelUtil.createhead(7);
+        LeavexExcelUtil.createother(list);
+
+        SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyyMMddhhmmss");
+        String date= simpleDateFormat.format(new Date());
+        FileOutputStream out= null;
+        try {
+            out = new FileOutputStream("e:\\leavex"+date+".xls");
+            LeavexExcelUtil.export(out);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }finally{
+            try {
+                out.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        response.setContentType("text/html;charset=utf-8");
+        try {
+            PrintWriter out2=response.getWriter();
+            out2.print("<script>alert('导出成功');location.href='/resource/myself/demo1/getList'</script>");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+//    批量删除
+    @RequestMapping("/resource/myself/demo1/deleteall")
+    public void deleteall(int[] single,int state, HttpServletResponse response){
+        response.setContentType("text/html;charset=utf-8");
+        try {
+            if(state == 0){
+                leavexService.deletebyids(single);
+                taskService.deletebyids(single);
+            }else {
+                response.getWriter().print("<script>alert('只能删除审核中的')</script>");
+            }
+            response.getWriter().print("<script>location.href='/resource/myself/demo1/getList'</script>");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+
+//    获取通告信息
+    @RequestMapping("/resource/myself/demo2/getAnounceMent")
+    public String getAnounceMent(String title, String starttime, String endtime,
+                                 @RequestParam(value="index", defaultValue = "1") int pageindex,
+                                 ModelMap map,
+                                 @RequestParam(value="size",defaultValue = "3") int size,Integer userid){
+
+        PageInfo pageInfo=announceService.selectall(title,starttime,endtime,pageindex,null,size, 1);
+        pageInfo.setPageSize(size);
+        map.put("pi",pageInfo);
+        map.put("title",title);
+        map.put("starttime",starttime);
+        map.put("endtime",endtime);
+        return "/resource/myself/demo2/list";
+    }
+
+//    查询任务中的请假详情
+    @RequestMapping("/resource/myself/demo2/getlook")
+    public String sid(ModelMap map, Announce announce){
+        Announce announce1 = announceService.selectbyid(announce.getId());
+        map.put("a1",announce1);
+        return "/resource/myself/demo2/look";
+    }
+//    异步修改状态
+    @RequestMapping("/resource/myself/demo1/updatestate")
+    public String updatestate(Integer id){
+
+        int k = leavexService.updatestate(id,1);
+        return "redirect:/resource/myself/demo1/getList";
+    }
+}

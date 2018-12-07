@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.OrgDeptMapper">
+  <resultMap id="BaseResultMap" type="com.bean.OrgDeptKey">
+    <id column="orgId" jdbcType="INTEGER" property="orgid" />
+    <id column="deptId" jdbcType="INTEGER" property="deptid" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="com.bean.OrgDeptKey">
+    delete from org_dept
+    where orgId = #{orgid,jdbcType=INTEGER}
+      and deptId = #{deptid,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.bean.OrgDeptKey">
+    insert into org_dept (orgId, deptId)
+    values (#{orgid,jdbcType=INTEGER}, #{deptid,jdbcType=INTEGER})
+  </insert>
+  <insert id="insertSelective" parameterType="com.bean.OrgDeptKey">
+    insert into org_dept
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="orgid != null">
+        orgId,
+      </if>
+      <if test="deptid != null">
+        deptId,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="orgid != null">
+        #{orgid,jdbcType=INTEGER},
+      </if>
+      <if test="deptid != null">
+        #{deptid,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+</mapper>

@@ -1,0 +1,44 @@
+package com.service.impl;
+
+import com.bean.Vcard;
+import com.dao.VcardMapper;
+import com.service.VcardService;
+import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+public class VcardServiceImpl implements VcardService {
+
+    @Autowired
+    private VcardMapper vcardMapper;
+    @Override
+    public int deleteByPrimaryKey(Integer id) {
+        return 0;
+    }
+
+    @Override
+    public int insert(Vcard record) {
+        return vcardMapper.insert(record);
+    }
+
+    @Override
+    public int insertSelective(Vcard record) {
+        return vcardMapper.insertSelective(record);
+    }
+
+    @Override
+    public Vcard selectByPrimaryKey(Integer id) {
+        return null;
+    }
+
+    @Override
+    public int updateByPrimaryKeySelective(Vcard record) {
+        return 0;
+    }
+
+    @Override
+    public int updateByPrimaryKey(Vcard record) {
+        return 0;
+    }
+}

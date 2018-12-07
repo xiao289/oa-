@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.CarMapper">
+  <resultMap id="BaseResultMap" type="com.bean.Car">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="carId" jdbcType="VARCHAR" property="carid" />
+    <result column="type" jdbcType="VARCHAR" property="type" />
+    <result column="color" jdbcType="VARCHAR" property="color" />
+    <result column="remark" jdbcType="VARCHAR" property="remark" />
+  </resultMap>
+  <select id="findcar" resultMap="BaseResultMap">
+    select * from car
+    where carid=#{carid}
+  </select>
+  <select id="getall" resultMap="BaseResultMap" parameterType="map">
+    select * from car
+  </select>
+
+  <select id="getall2" resultMap="BaseResultMap" parameterType="map">
+    select * from car
+    where
+    <if test="ids!=null ">
+      id in (
+      <foreach collection="ids" item="id" separator=",">
+        #{id}
+      </foreach>
+      )
+    </if>
+  </select>
+  <sql id="Base_Column_List">
+    id, carId, type, color, remark
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from car
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from car
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.bean.Car">
+    insert into car (id, carId, type, 
+      color, remark)
+    values (#{id,jdbcType=INTEGER}, #{carid,jdbcType=VARCHAR}, #{type,jdbcType=VARCHAR}, 
+      #{color,jdbcType=VARCHAR}, #{remark,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.bean.Car">
+    insert into car
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="carid != null">
+        carId,
+      </if>
+      <if test="type != null">
+        type,
+      </if>
+      <if test="color != null">
+        color,
+      </if>
+      <if test="remark != null">
+        remark,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="carid != null">
+        #{carid,jdbcType=VARCHAR},
+      </if>
+      <if test="type != null">
+        #{type,jdbcType=VARCHAR},
+      </if>
+      <if test="color != null">
+        #{color,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null">
+        #{remark,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.bean.Car">
+    update car
+    <set>
+      <if test="carid != null">
+        carId = #{carid,jdbcType=VARCHAR},
+      </if>
+      <if test="type != null">
+        type = #{type,jdbcType=VARCHAR},
+      </if>
+      <if test="color != null">
+        color = #{color,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null">
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.bean.Car">
+    update car
+    set carId = #{carid,jdbcType=VARCHAR},
+      type = #{type,jdbcType=VARCHAR},
+      color = #{color,jdbcType=VARCHAR},
+      remark = #{remark,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

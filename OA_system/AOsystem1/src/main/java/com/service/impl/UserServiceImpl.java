@@ -1,0 +1,144 @@
+package com.service.impl;
+
+import com.bean.Menu;
+import com.bean.Role;
+import com.bean.User;
+import com.dao.MenuMapper;
+import com.dao.UserMapper;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import com.service.MenuService;
+import com.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@Service
+public class UserServiceImpl implements UserService {
+    @Autowired
+    private UserMapper userMapper;
+    @Autowired
+    private MenuService menuService;
+    @Override
+    public int deleteByPrimaryKey(Integer id) {
+        return userMapper.deleteByPrimaryKey(id);
+    }
+
+    @Override
+    public List<User> querybyroleid(Integer id) {
+        return userMapper.querybyroleid(id);
+    }
+
+    @Override
+    public List<User> querybyroleid1() {
+        return userMapper.querybyroleid1();
+    }
+
+    @Override
+    public int insert(User record) {
+        return userMapper.insert(record);
+    }
+
+    @Override
+    public int insertSelective(User record) {
+        return 0;
+    }
+
+    @Override
+    public User selectByPrimaryKey(Integer id) {
+        return userMapper.selectByPrimaryKey(id);
+    }
+
+    @Override
+    public int updateByPrimaryKeySelective(User record) {
+        return userMapper.updateByPrimaryKeySelective(record);
+    }
+
+    @Override
+    public int updateByPrimaryKey(User record) {
+        return 0 ;
+    }
+
+    @Override
+    public User login(User user) {
+        User user1= userMapper.login(user.getLoginname());
+        System.out.println(user1);
+        if(user1 !=null && user1.getPassword().equals(user.getPassword())){
+            if(user1.getRole().getState()==0){
+
+                Role role=user1.getRole();
+                //通过角色的id获取对应的菜单集合
+                List<Menu> list=menuService.findbyroleid(user1.getRoleid());
+                System.out.println(role.getId());
+                //将菜单进行分类
+                List flist=new ArrayList();
+                for (Menu menu : list) {
+                    if(menu.getPid()==-1){
+                    List newlist=new  ArrayList();//只保存二级菜单
+                        for (Menu menu1 : list) {
+                            if(menu1.getPid()==menu.getId()){
+                                newlist.add(menu1);
+                            }
+                        }
+                         menu.setSeconds(newlist);
+                         flist.add(menu);
+                    }
+                }
+                   //将分级完成的菜单赋给角色
+                role.setMenus(flist);
+                //将角色赋给用户
+                user1.setRole(role);
+            }
+            return user1;
+        }else {
+            return  null;
+        }
+    }
+
+    @Override
+    public PageInfo findalluser(String username, String name, int pageindex, int size, int[] ids) {
+        Map map = new HashMap();
+        map.put("username",username);
+        map.put("name",name);
+        map.put("ids",ids);
+        PageHelper.startPage(pageindex,size);
+        List<User> list = userMapper.findalluser(map);
+        PageInfo pageInfo = new PageInfo(list);
+        return pageInfo;
+    }
+
+    @Override
+    public User selectByLoginname(String loginname) {
+        return userMapper.selectByLoginname(loginname);
+    }
+
+    @Override
+    public int deleteByArray(int[] ids) {
+        Map map = new HashMap();
+        map.put("ids", ids);
+        return userMapper.deleteByArray(map);
+    }
+
+    @Override
+    public User selectByusername(String name) {
+        Map map = new HashMap();
+        map.put("name",name);
+        return userMapper.selectByusername(map);
+    }
+
+    @Override
+    public List<User> querybyroleid12(int roleid) {
+        return userMapper.querybyroleid12(roleid);
+    }
+
+    @Override
+    public User selectbyid(Integer userid) {
+        return userMapper.selectbyid(userid);
+    }
+
+
+}

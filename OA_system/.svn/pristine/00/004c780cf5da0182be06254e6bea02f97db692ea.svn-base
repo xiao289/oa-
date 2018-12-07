@@ -1,0 +1,80 @@
+
+package com.service.impl;
+
+import com.bean.Car;
+import com.dao.CarMapper;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import com.service.CarService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@Service
+public class CarServiceImpl implements CarService {
+    @Autowired
+    private CarMapper carMapper;
+
+
+    @Override
+    public int deleteByPrimaryKey(Integer id) {
+        return carMapper.deleteByPrimaryKey(id);
+    }
+
+    @Override
+    public int insert(Car record) {
+        return 0;
+    }
+
+    @Override
+    public int insertSelective(Car record) {
+        return carMapper.insertSelective(record);
+    }
+
+    @Override
+    public Car selectByPrimaryKey(Integer id) {
+        return carMapper.selectByPrimaryKey(id);
+    }
+
+    @Override
+    public int updateByPrimaryKeySelective(Car record) {
+        return carMapper.updateByPrimaryKeySelective(record);
+    }
+
+    @Override
+    public int updateByPrimaryKey(Car record) {
+        return 0;
+    }
+
+    @Override
+    public PageInfo getall(int pageindex, int size) {
+        Map map=new HashMap();
+        /*map.put("pageindex",pageindex);
+        map.put("size",size);*/
+        PageHelper.startPage(pageindex,size);
+        List list=carMapper.getall(map);
+        PageInfo pa=new PageInfo(list);
+        return pa;
+    }
+
+    @Override
+    public PageInfo getall2(int pageindex, int size, int[] ids) {
+        Map map=new HashMap();
+        map.put("ids",ids);
+        PageHelper.startPage(pageindex,size);
+        List list=carMapper.getall(map);
+        PageInfo pa=new PageInfo(list);
+        return pa;
+    }
+
+    @Override
+    public List<Car> findcar(String carid) {
+        Map map=new HashMap();
+        map.put("carid",carid);
+        return carMapper.findcar(map);
+    }
+
+}

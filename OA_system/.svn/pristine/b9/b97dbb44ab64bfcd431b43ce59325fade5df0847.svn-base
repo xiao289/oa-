@@ -1,0 +1,99 @@
+﻿<%@ page isELIgnored="false" contentType="text/html;charset=UTF-8" language="java" %>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<!doctype html>
+ <html >
+ <head>
+   <meta charset="UTF-8">
+   <link rel="stylesheet" href="../../../css/common.css">
+   <link rel="stylesheet" href="../../../css/main.css">
+   <script type="text/javascript" src="../../../js/jquery.min.js"></script>
+   <script type="text/javascript" src="../../../js/colResizable-1.3.min.js"></script>
+   <script type="text/javascript" src="../../../js/common.js"></script>
+</head>
+    <script type="text/javascript">
+        $(function () {
+
+            $("[name=button1]").click(function () {
+                var end = $("[name=endtime]").val();
+                var start=$("[name=starttime]").val();
+                if(end<start){
+                    alert("预约时间，终止时间不可以小于初始时间")
+                }else{
+                    $(this).submit();
+                }
+            });
+
+
+
+
+
+        })
+    </script>
+<body>
+  <div id="forms" class="mt10">
+        <div class="box">
+          <div class="box_border">
+            <div class="box_top"><b class="pl15">图书借阅申请</b></div>
+            <div class="box_center">
+              <form action="list.jsp" class="jqtransform">
+               <table class="form_table pt15 pb15" width="100%" border="0" cellpadding="0" cellspacing="0">
+                 <tr>
+                  <td class="td_right">姓名：</td>
+                     <td class="">
+                         <input type="hidden" name="userid" value="${loginname.id}" readonly>${loginname.name}
+                     </td>
+				  </tr>
+				  <tr>
+                      <td class="td_right">借阅时间：</td>
+                      <td>
+                          <input type="text" name="starttime" class="input-text lh30" size="40">to
+                          <input type="text" name="endtime" class="input-text lh30" size="40">
+                      </td>
+                  </tr>
+                  <tr>
+                      <td class="td_right">部门：</td>
+                      <td>
+                        <c:forEach items="${loginname.depts}" var="dept">
+                            <input type="hidden" name="deptid" readonly value="${dept.id}"/>${dept.name}
+                        </c:forEach>
+                      </td>
+                  </tr>
+				<tr>
+                  <td class="td_right">图书编号：</td>
+				  <td><input type="text" name="bookid" class="input-text lh30" size="40"></td>
+                </tr>
+				
+                 <tr>
+                  <td class="td_right">图书名称：</td>
+				  <td><input type="text" name="bookname" class="input-text lh30" size="40"></td>
+                </tr>
+				
+				<tr>
+                  <td class="td_right">下一步审批人：</td>
+                    <td>
+                    <select name="adminid" class="input-text lh30">
+                        <option value="-1">请选择</option>
+                        <c:forEach items="${admins}" var="admin">
+                            <option value="${admin.id}">${admin.name}</option>
+                        </c:forEach>
+                    </select>
+                    </td>
+                </tr>
+                 <tr>
+                   <td class="td_right">&nbsp;</td>
+                   <td class="">
+                     <input type="submit" name="button1" class="btn btn82 btn_save2" value="确定">
+                    <input type="button" name="button" class="btn btn82 btn_res" onclick="location.href='javascript:history.go(-1)'" value="返回"> 
+                   </td>
+                 </tr>
+               </table>
+               </form>
+            </div>
+          </div>
+        </div>
+     </div>
+   </div> 
+</body>
+
+</html>

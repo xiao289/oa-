@@ -1,0 +1,76 @@
+package com.web;
+
+import com.bean.Dept;
+import com.bean.Role;
+import com.bean.User;
+import com.dao.UserMapper;
+import com.service.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Controller
+public class RenshiController {
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private DeptService deptService;
+    @Autowired
+    private RoleService roleService;
+    @Autowired
+    private TrafficService trafficService;
+    @Autowired
+    LeaveTypeService leaveTypeService;
+
+
+    //请假申请页面
+    @RequestMapping("/resource/renshi/demo1/getuser")
+    public String finduser(Integer id, ModelMap map){
+        User user= userService.selectByPrimaryKey(id);
+        Dept dept=deptService.selectByPrimaryKey(user.getDeptid());
+        List list1=leaveTypeService.getall();
+        List list=new ArrayList();
+        list.add(dept);
+        user.setDepts(list);
+        map.put("ulist",user);
+        map.put("llist",list1);
+        return "/resource/renshi/demo1/list";
+    }
+
+    //出差申请页面
+    @RequestMapping("/resource/renshi/demo1/getuser2")
+    public String finduser2(Integer id, ModelMap map){
+        User user= userService.selectByPrimaryKey(id);
+        Dept dept=deptService.selectByPrimaryKey(user.getDeptid());
+        List list1=trafficService.getall();
+        List list=new ArrayList();
+        list.add(dept);
+        user.setDepts(list);
+        map.put("ulist",user);
+        map.put("tlist",list1);
+        return "/resource/renshi/demo2/list";
+    }
+
+    //收入证明页面
+    @RequestMapping("/resource/renshi/demo1/getuser3")
+    public String finduser3(Integer id, ModelMap map){
+        User user= userService.selectByPrimaryKey(id);
+        Dept dept=deptService.selectByPrimaryKey(user.getDeptid());
+        Role role=roleService.selectByPrimaryKey(user.getRoleid());
+        List list=new ArrayList();
+        List list1=new ArrayList();
+        list.add(dept);
+        list1.add(role);
+        user.setDepts(list);
+        user.setRoles(list1);
+        map.put("ulist",user);
+        return "/resource/renshi/demo3/list";
+    }
+    
+
+
+}

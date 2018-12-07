@@ -1,0 +1,42 @@
+package com.service.impl;
+
+import com.bean.Cachet;
+import com.dao.CachetMapper;
+import com.service.CachetService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+public class CachetServiceImpl implements CachetService {
+    @Autowired
+    private CachetMapper cachetMapper;
+    @Override
+    public int deleteByPrimaryKey(Integer id) {
+        return 0;
+    }
+
+    @Override
+    public int insert(Cachet record) {
+        return cachetMapper.insert(record);
+    }
+
+    @Override
+    public int insertSelective(Cachet record) {
+        return cachetMapper.insertSelective(record);
+    }
+
+    @Override
+    public Cachet selectByPrimaryKey(Integer id) {
+        return null;
+    }
+
+    @Override
+    public int updateByPrimaryKeySelective(Cachet record) {
+        return 0;
+    }
+
+    @Override
+    public int updateByPrimaryKey(Cachet record) {
+        return 0;
+    }
+}

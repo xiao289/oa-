@@ -1,0 +1,207 @@
+﻿<!doctype html>
+<%@ page isELIgnored="false" contentType="text/html;charset=UTF-8" language="java" %>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%--<%@ taglib prefix="fy" uri="http://java.sun.com/jsp/femye/fy" %>--%>
+<%@taglib prefix="page" uri="http://com.letben.tag" %>
+ <html lang="zh-CN">
+ <head>
+   <meta charset="UTF-8">
+   <link rel="stylesheet" href="../../../css/common.css">
+   <link rel="stylesheet" href="../../../css/main.css">
+   <script type="text/javascript" src="../../../js/jquery.min.js"></script>
+   <script type="text/javascript" src="../../../js/colResizable-1.3.min.js"></script>
+   <script type="text/javascript" src="../../../js/common.js"></script>
+
+     <%--全选--%>
+     <script type="text/javascript">
+         $(function(){
+             $("[name=all]").click(function(){
+                 //alert($(this)[0].checked);
+                 var singles=$("[name=single]");
+                 for(var i=0;i<singles.length;i++){
+                     singles[i].checked=$(this)[0].checked;
+                 }
+             });
+         })
+     </script>
+     <%--总删除--%>
+     <script type="text/javascript">
+         function delall() {
+
+             var zi = $("[name=single]");
+             var k = 1;
+             for (var i = 0; i < zi.length; i++) {
+                 if (zi[i].checked == true) {
+                     k = 2;
+                     var rs = confirm("确认删除？？？");
+                     if (rs) {
+                         $("[name=formx]").attr("action", "/resource/myself/demo1/deleteall");
+                         document.forms[1].submit();
+                     }
+                     break;
+                 }
+             }
+             if(k == 1){
+                 alert("先选择信息才能删除！！！")
+             }
+         }
+     </script>
+
+     <%--批量导出--%>
+     <script type="text/javascript">
+         function daochu() {
+             var zi=$("[name=single]");
+             var k=1;
+             for (var i = 0; i < zi.length; i++) {
+                 if(zi[i].checked==true){
+                     k=2;
+                     var rs=confirm("导出？");
+                     if(rs){
+                         $("[name=formx]").attr("action","/resource/myself/demo1/daochu");
+                         document.forms[1].submit();
+                     }
+                     break;
+                 }
+             }
+             if(k==1){
+                 alert("先选择信息才能导出！！！")
+             }
+         }
+     </script>
+
+     <script>
+
+         $(function () {
+             $("[name=button1]").click(function () {
+                 var end = $("[name=endtime]").val();
+                 var start=$("[name=starttime]").val();
+                 if(end<start){
+                     alert("终止时间不可以小于初始时间")
+                 }else{
+                     $(this).submit();
+                 }
+             });
+         })
+     </script>
+</head>
+<body>
+
+     <div id="search_bar" class="mt10">
+       <div class="box">
+          <div class="box_border">
+            <div class="box_top"><b class="pl15">待处理任务</b></div>
+            <div class="box_center pt10 pb10">
+                <form action="/resource/myself/demo1/getList" method="post">
+              <table class="form_table" border="0" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td>发起时间</td>
+                  <td><input type="text" id="starttime" name="starttime" class="input-text lh25" size="10" value="${starttime}">to
+				  <input type="text"  id="endtime" name="endtime" class="input-text lh25" size="10" value="${endtime}"></td>
+                 
+                  <td>任务类型</td>
+                  <td>
+                      <select class="input-text lh25" name="type">
+                          <option value="0">请选择</option>
+                          <option value="1">请假申请</option>
+                          <option value="2">出差申请</option>
+                          <option value="3">用车管理</option>
+                          <option value="4">用章管理</option>
+                          <option value="5">图书借阅申请</option>
+                          <option value="6">名片印刷申请</option>
+                          <option value="7">收入证明</option>
+                      </select>
+                  </td>
+                   <td><input type="submit" name="button" class="btn btn82 btn_search" value="查询">
+			    <input type="button" name="button" class="btn btn82 btn_recycle" id="btn" value="清空"></td>
+                </tr>
+               
+              </table>
+                </form>
+            </div>
+                <script>
+                    /*清空表单*/
+                    $("#btn").click(function () {
+                        $("#starttime").val("");
+                        $("#endtime").val("");
+                        location.href="/resource/myself/demo1/getList";
+                    })
+                </script>
+            
+			</div>  </div>
+
+
+ <div id="table" class="mt10">
+        <div class="box span10 oh">
+            <form action="" name="formx"  method="post">
+
+              <table width="100%" border="0" cellpadding="0" cellspacing="0" class="list_table">
+                <tr>
+				   <th> <input type="checkbox" name="all"></th>
+                   <th>任务名称</th>
+                   <th>发起时间</th>
+                   <th>发起人</th>
+                   <th>最后审批时间</th>
+				   <th>状态</th>
+				   <th>操作</th>
+                    </tr>
+
+
+                  <c:forEach items="${pi.list}" var="leavex">
+                      <tr class="tr" align="center">
+                      <tr class="tr" align="center">
+                          <td class="td_center">
+                              <input type="checkbox" name="single" value="${leavex.id}">
+                              <input type="hidden" name="state" value="${leavex.state}">
+                          </td>
+                          <td>
+                              <a href="/resource/myself/demo1/getLeavex?id=${leavex.id}&type=${leavex.type}&userid=${leavex.user.id}">${task.name}</a>
+                          </td>
+                          <td><fmt:formatDate value='${leavex.starttime}' pattern='yyyy/MM/dd'/></td>
+                          <td>${leavex.user.name}</td>
+                          <td><fmt:formatDate value='${leavex.endtime}' pattern='yyyy/MM/dd'/></td>
+                          <td>
+
+                              <c:if test="${leavex.state == 0}">审核中</c:if>
+                              <c:if test="${leavex.state == 1}">审核通过</c:if>
+                              <c:if test="${leavex.state == 2}">审核不通过</c:if>
+                          </td>
+
+                          <td>
+                              <a href="/resource/myself/demo1/getLeavex?id=${leavex.id}&type=${leavex.type}&userid=${leavex.user.id}">
+                                  <c:if test="${leavex.state == 2 || leavex.state == 1}">查看</c:if>
+                                  <c:if test="${leavex.state == 0}">
+                                      <a href="/resource/myself/demo1/updatestate?id=${leavex.id}">通过</a>
+                                      <a href="/resource/myself/demo1/updatestate?id=${leavex.id}">驳回</a>
+                                      <a href="/resource/myself/demo1/getLeavex?id=${leavex.id}type=${leavex.type}&userid=${leavex.user.id}">查看</a>
+                                  </c:if>
+                              </a>
+                          </td>
+                      </tr>
+                  </c:forEach>
+
+
+
+                  <tr>
+
+
+			   <td colspan="2">
+                   <input type="button" name="button1"  class="btn btn82 btn_export" value="删除" onclick="delall()">
+			    <input type="button" name="button2"  class="btn btn82 btn_export" value="导出" onclick="daochu()">
+				</td>
+				<td colspan="5" align="right">
+				     <div class="page mt10">
+						<div class="pagination">
+                            <page:page pageSize="${pi.size }" historical="" method="starttime=${starttime}&endtime=${endtime}&type=${type}" url="/resource/myself/demo1/getList" currentPage="${pi.pageNum }" count="${pi.total }"/>
+                           <%-- <fy:fy url="/resource/myself/demo1/getList?starttime=${starttime}&endtime=${endtime}&type=${type}" pageInfo="${pi}"/>--%>
+						</div>
+                     </div>
+				</td>
+			   </tr>
+              </table>			  
+            </form>
+        </div>
+     </div>
+     </div>
+</body>
+</html>

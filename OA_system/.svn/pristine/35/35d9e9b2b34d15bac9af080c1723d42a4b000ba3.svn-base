@@ -1,0 +1,32 @@
+package com.web;
+
+import com.github.pagehelper.PageInfo;
+import com.service.LogService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.text.SimpleDateFormat;
+
+@Controller
+public class LogController {
+    @Autowired
+    private LogService logService;
+
+    @RequestMapping("/resource/system/log/listlog")
+    public String findalllog(@RequestParam(value = "index",defaultValue = "1") int index,
+                             @RequestParam(value = "size", defaultValue = "110") int size, ModelMap map,
+                             String usern, String shijian1,String shijian2){
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String da1 = dateFormat.format(shijian1);
+        String da2 = dateFormat.format(shijian2);
+        PageInfo pageInfo = logService.findalllog(index, size, usern, da1,da2);
+        map.put("pi",pageInfo);
+        map.put("username",usern);
+        map.put("shijain1",shijian1);
+        map.put("shijain2",shijian2);
+        return "/resource/system/log/list";
+    }
+}

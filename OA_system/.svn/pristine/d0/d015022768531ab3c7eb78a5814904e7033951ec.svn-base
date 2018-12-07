@@ -1,0 +1,51 @@
+package com.service.impl;
+
+import com.bean.Traffic;
+import com.dao.TrafficMapper;
+import com.service.TrafficService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class TrafficServiceImpl implements TrafficService {
+
+    @Autowired
+    private TrafficMapper trafficMapper;
+
+    @Override
+    public int deleteByPrimaryKey(Integer id) {
+        return 0;
+    }
+
+    @Override
+    public int insert(Traffic record) {
+        return 0;
+    }
+
+    @Override
+    public int insertSelective(Traffic record) {
+        return 0;
+    }
+
+    @Override
+    public Traffic selectByPrimaryKey(Integer id) {
+        return null;
+    }
+
+    @Override
+    public int updateByPrimaryKeySelective(Traffic record) {
+        return 0;
+    }
+
+    @Override
+    public int updateByPrimaryKey(Traffic record) {
+        return 0;
+    }
+
+    @Override
+    public List getall() {
+        return trafficMapper.getall();
+    }
+}

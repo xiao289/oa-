@@ -1,0 +1,94 @@
+package com.service.impl;
+
+import com.bean.Menu;
+import com.dao.MenuMapper;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import com.service.MenuService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@Service
+public class MenuServiceImpl implements MenuService {
+    @Autowired
+    private MenuMapper menuMapper;
+
+    @Override
+    public int deleteByPrimaryKey(Integer id) {
+        return menuMapper.deleteByPrimaryKey(id);
+    }
+
+    @Override
+    public int insert(Menu record) {
+        return menuMapper.insert(record);
+    }
+
+    @Override
+    public int insertSelective(Menu record) {
+        return menuMapper.insertSelective(record);
+    }
+
+    @Override
+    public Menu selectByPrimaryKey(Integer id) {
+        return menuMapper.selectByPrimaryKey(id);
+    }
+
+    @Override
+    public int updateByPrimaryKeySelective(Menu record) {
+        return menuMapper.updateByPrimaryKeySelective(record);
+    }
+
+    @Override
+    public int updateByPrimaryKey(Menu record) {
+        return menuMapper.updateByPrimaryKey(record);
+    }
+
+    @Override
+    public PageInfo findmenu(int pagesize, int size, String menuname) {
+        Map map = new HashMap();
+        map.put("menuname1",menuname);
+        PageHelper.startPage(pagesize,size);
+        List<Menu> list = menuMapper.findmenu(map);
+
+        PageInfo pageInfo = new PageInfo(list);
+        return pageInfo;
+    }
+
+    @Override
+    public List<Menu> findupmenu(int pid) {
+        return menuMapper.findupmenu(pid);
+    }
+
+    @Override
+    public List<Menu> findmenubyarray(int[] ids) {
+        Map map = new HashMap();
+        map.put("ids", ids);
+
+        return menuMapper.findmenubyarray(map);
+    }
+
+    @Override
+    public int deletebtints(int[] ids) {
+        Map map = new HashMap();
+        map.put("ids",ids);
+
+        return menuMapper.deletebtints(map);
+    }
+
+    @Override
+    public Menu selectByMenuname(String name) {
+        return menuMapper.selectByMenuname(name);
+    }
+
+    @Override
+    public List<Menu> findbyroleid(int id) {
+        return menuMapper.findbyroleid(id);
+    }
+
+
+}

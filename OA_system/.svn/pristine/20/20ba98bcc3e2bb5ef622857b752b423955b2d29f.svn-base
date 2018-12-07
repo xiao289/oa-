@@ -1,0 +1,203 @@
+package com.web;
+
+import com.bean.User;
+import com.bean.Organization;
+import com.bean.Role;
+import com.bean.User;
+import com.github.pagehelper.PageInfo;
+import com.service.OrganizationService;
+import com.service.RoleService;
+import com.service.UserService;
+import com.util.ImageUtil;
+import com.sun.org.apache.xpath.internal.operations.Mod;
+import com.util.UserExcelUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Map;
+
+import java.util.List;
+
+@Controller
+public class UserController {
+
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private RoleService roleService;
+    @Autowired
+    private OrganizationService organizationService;
+
+    //登陆
+    @RequestMapping("/login")
+    public void loginsystem(User user, HttpServletResponse response, Map map, String yanzheng, HttpServletRequest request, HttpSession session) {
+        response.setContentType("text/html;charset=utf-8");
+        try {
+            PrintWriter out = response.getWriter();
+            User user1 = userService.login(user);
+            String yz = ImageUtil.getCode();
+
+            if (user1==null){
+                out.print("<script>alert('用户名密码不正确');location.href='login.jsp'</script>");
+
+            }else {
+                if(user1.getState()==1){
+                    out.print("<script>alert('此用户被禁用');location.href='login.jsp'</script>");
+                }else if(user1.getState()==0){
+                    if (1==1/*yz.equalsIgnoreCase(yanzheng)*/){
+
+                        map.put("u1", user1);
+                        session.setAttribute("loginname",user1);
+                        out.print("<script>alert('登陆成功');location.href='index.jsp'</script>");
+                    }else {
+                        out.print("<script>alert('验证码输入不正确');location.href='login.jsp'</script>");
+
+                    }
+                }
+                }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 查询所有得user
+     * @param username 模糊查登陆  loginName 姓名
+     * @param name 模糊查真实姓名
+     * @param index 页码
+     * @param size 显示数量
+     * @param map  map传值
+     * @return  返回到user list.jsp 主界面
+     */
+    @RequestMapping("/resource/system/user/getallUser")
+    public String findalluser(String username, String name,
+                              @RequestParam(value = "index",defaultValue = "1") int index,
+                              @RequestParam(value = "size", defaultValue = "5") int size, ModelMap map){
+        //查询user返回pageinfo
+        PageInfo pageInfo = userService.findalluser(username, name, index, size,null);
+        map.put("pi",pageInfo);
+        map.put("loginname1", username);
+        map.put("realname",name);
+        return "resource/system/user/list";
+    }
+
+    /**
+     * 添加用户之前查询部门和机构信息
+     * @param map
+     * @return
+     */
+    @RequestMapping("/resource/system/readyuseradd")
+    public String readyadduser(ModelMap map){
+        //查询角色列表传进前台
+        List<Role> roles = roleService.findallrole();
+        map.put("role",roles);
+        //查询机构名称传入前台
+        List<Organization> organizations = organizationService.findallorganization();
+        map.put("org", organizations);
+        return "/resource/system/user/add";
+    }
+
+    @RequestMapping("/resource/system/user/adduser")
+    public String addueser(User user){
+        userService.insert(user);
+        return "redirect:/resource/system/user/getallUser";
+    }
+
+    /**
+     * 修改user
+     * 查询用户信息，查询机构，角色信息
+     * @param userid
+     * @param map
+     * @return
+     */
+    @RequestMapping("/resource/system/user/readyedituser")
+    public String editready(int userid, ModelMap map){
+        //查询角色列表传进前台
+        List<Role> roles = roleService.findallrole();
+        map.put("role",roles);
+        //查询机构名称传入前台
+        List<Organization> organizations = organizationService.findallorganization();
+        map.put("org", organizations);
+        User user = userService.selectByPrimaryKey(userid);
+        map.put("user",user);
+        return "/resource/system/user/edit";
+    }
+
+    /**
+     * 根据主键删除user
+     * @param userid
+     * @return
+     */
+    @RequestMapping("/resource/system/user/deleteuser")
+    public String edituser(int userid){
+        userService.deleteByPrimaryKey(userid);
+        return "redirect:/resource/system/user/getallUser";
+    }
+
+    /**
+     * 接受id得集合  删除user
+     * @param single
+     * @return
+     */
+    @RequestMapping("/resource/system/user/deleteusers")
+    public String editusers(int[] single){
+        userService.deleteByArray(single);
+        return "redirect:/resource/system/user/getallUser";
+    }
+
+    /**
+     * 更新user
+     * @param user
+     * @return
+     */
+    @RequestMapping("/resource/system/user/editstate")
+    public String editstate(User user){
+        userService.updateByPrimaryKeySelective(user);
+        return "redirect:/resource/system/user/getallUser";
+    }
+
+    @RequestMapping("/resource/system/user/daochu")
+    public void edituser(int[] single, HttpServletResponse response){
+        PageInfo pageInfo = userService.findalluser(null, null, 0, 0, single);
+        List list = pageInfo.getList();
+
+        UserExcelUtil.headers = new String[]{"用户名","真实姓名","角色","机构","部门","状态"};
+        UserExcelUtil.createhead(6);
+        UserExcelUtil.createother(list);
+        SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyyMMddhhmmss");
+        String date= simpleDateFormat.format(new Date());
+        FileOutputStream outputStream = null;
+        try {
+            outputStream = new FileOutputStream("f:\\alluser" + date + ".xls");
+            UserExcelUtil.export(outputStream);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }finally {
+            try {
+                outputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        response.setContentType("text/html;charset=utf-8");
+        try {
+            PrintWriter out2=response.getWriter();
+            out2.print("<script>alert('导出成功');location.href='/resource/system/user/getallUser'</script>");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+}

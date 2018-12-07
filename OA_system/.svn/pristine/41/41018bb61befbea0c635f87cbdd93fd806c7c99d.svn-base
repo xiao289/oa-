@@ -1,0 +1,86 @@
+package com.service.impl;
+
+import com.bean.RoomReserve;
+import com.bean.User;
+import com.dao.RoomReserveMapper;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import com.service.RoomReserveService;
+import com.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@Service
+public class RoomReserveServiceImpl implements RoomReserveService {
+
+    @Autowired
+    private RoomReserveMapper roomReserveMapper;
+    @Autowired
+    private UserService userService;
+    @Override
+    public int deleteByPrimaryKey(Integer id) {
+        return 0;
+    }
+
+    @Override
+    public int deletemany(int[] reserveids) {
+        return roomReserveMapper.deletemany(reserveids);
+    }
+
+    @Override
+    public List querynany(int[] reserveids) {
+        List<RoomReserve> querymany = roomReserveMapper.querymany(reserveids);
+        for (RoomReserve reserve : querymany) {
+            User user = userService.selectByPrimaryKey(reserve.getAdminid());
+            reserve.setAdmin(user);
+        }
+        return querymany;
+    }
+
+    @Override
+    public PageInfo queryall(int index, int size, String roomname, String yuname, int type) {
+        PageHelper.startPage(index,size);
+        Map map=new HashMap();
+        map.put("roomname",roomname);
+        map.put("yuname",yuname);
+        map.put("type",type);
+        List<RoomReserve> queryall = roomReserveMapper.queryall(map);
+        for (RoomReserve reserve : queryall) {
+            User user = userService.selectByPrimaryKey(reserve.getAdminid());
+            reserve.setAdmin(user);
+        }
+        PageInfo pageInfo =new PageInfo(queryall);
+        return pageInfo;
+    }
+
+    @Override
+    public int insert(RoomReserve record) {
+        return 0;
+    }
+
+    @Override
+    public int insertSelective(RoomReserve record) {
+        return 0;
+    }
+
+    @Override
+    public RoomReserve selectByPrimaryKey(Integer id) {
+        return null;
+    }
+
+    @Override
+    public int updateByPrimaryKeySelective(RoomReserve record) {
+        return 0;
+    }
+
+    @Override
+    public int updateByPrimaryKey(RoomReserve record) {
+        return 0;
+    }
+
+
+}

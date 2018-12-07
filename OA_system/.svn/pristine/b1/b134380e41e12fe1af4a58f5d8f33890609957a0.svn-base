@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.CarReserveMapper">
+  <resultMap id="BaseResultMap" type="com.bean.CarReserve">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="carId" jdbcType="VARCHAR" property="carid" />
+    <result column="userId" jdbcType="INTEGER" property="userid" />
+    <result column="startTime" jdbcType="DATE" property="starttime" />
+    <result column="endTime" jdbcType="DATE" property="endtime" />
+    <result column="address" jdbcType="VARCHAR" property="address" />
+    <result column="miles" jdbcType="INTEGER" property="miles" />
+    <result column="remark" jdbcType="VARCHAR" property="remark" />
+    <result column="adminId" jdbcType="INTEGER" property="adminid" />
+  </resultMap>
+
+  <select id="check" resultMap="BaseResultMap">
+    select * from car_reserve
+    where carid=#{carid}
+  </select>
+
+  <sql id="Base_Column_List">
+    id, carId, userId, startTime, endTime, address, miles, remark, adminId
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from car_reserve
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from car_reserve
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.bean.CarReserve">
+    insert into car_reserve (id, carId, userId, 
+      startTime, endTime, address, 
+      miles, remark, adminId
+      )
+    values (#{id,jdbcType=INTEGER}, #{carid,jdbcType=VARCHAR}, #{userid,jdbcType=INTEGER}, 
+      #{starttime,jdbcType=DATE}, #{endtime,jdbcType=DATE}, #{address,jdbcType=VARCHAR}, 
+      #{miles,jdbcType=INTEGER}, #{remark,jdbcType=VARCHAR}, #{adminid,jdbcType=INTEGER}
+      )
+  </insert>
+  <insert id="insertSelective" useGeneratedKeys="true" keyColumn="id" keyProperty="id" parameterType="com.bean.CarReserve">
+    insert into car_reserve
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="carid != null">
+        carId,
+      </if>
+      <if test="userid != null">
+        userId,
+      </if>
+      <if test="starttime != null">
+        startTime,
+      </if>
+      <if test="endtime != null">
+        endTime,
+      </if>
+      <if test="address != null">
+        address,
+      </if>
+      <if test="miles != null">
+        miles,
+      </if>
+      <if test="remark != null">
+        remark,
+      </if>
+      <if test="adminid != null">
+        adminId,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="carid != null">
+        #{carid,jdbcType=VARCHAR},
+      </if>
+      <if test="userid != null">
+        #{userid,jdbcType=INTEGER},
+      </if>
+      <if test="starttime != null">
+        #{starttime,jdbcType=DATE},
+      </if>
+      <if test="endtime != null">
+        #{endtime,jdbcType=DATE},
+      </if>
+      <if test="address != null">
+        #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="miles != null">
+        #{miles,jdbcType=INTEGER},
+      </if>
+      <if test="remark != null">
+        #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="adminid != null">
+        #{adminid,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.bean.CarReserve">
+    update car_reserve
+    <set>
+      <if test="carid != null">
+        carId = #{carid,jdbcType=VARCHAR},
+      </if>
+      <if test="userid != null">
+        userId = #{userid,jdbcType=INTEGER},
+      </if>
+      <if test="starttime != null">
+        startTime = #{starttime,jdbcType=DATE},
+      </if>
+      <if test="endtime != null">
+        endTime = #{endtime,jdbcType=DATE},
+      </if>
+      <if test="address != null">
+        address = #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="miles != null">
+        miles = #{miles,jdbcType=INTEGER},
+      </if>
+      <if test="remark != null">
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="adminid != null">
+        adminId = #{adminid,jdbcType=INTEGER},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.bean.CarReserve">
+    update car_reserve
+    set carId = #{carid,jdbcType=VARCHAR},
+      userId = #{userid,jdbcType=INTEGER},
+      startTime = #{starttime,jdbcType=DATE},
+      endTime = #{endtime,jdbcType=DATE},
+      address = #{address,jdbcType=VARCHAR},
+      miles = #{miles,jdbcType=INTEGER},
+      remark = #{remark,jdbcType=VARCHAR},
+      adminId = #{adminid,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

@@ -1,0 +1,40 @@
+package com.util;
+
+import com.bean.User;
+
+import javax.servlet.*;
+import javax.servlet.annotation.WebFilter;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.IOException;
+import java.io.PrintWriter;
+@WebFilter(filterName = "loginFilter")
+public class LoginFilter implements Filter {
+    @Override
+    public void init(FilterConfig filterConfig) throws ServletException {
+    }
+
+    @Override
+    public void doFilter(ServletRequest arg0, ServletResponse arg1, FilterChain arg2) throws IOException, ServletException {
+        HttpServletRequest request = (HttpServletRequest)arg0;
+        HttpServletResponse response = (HttpServletResponse)arg1;
+        request.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
+        HttpSession session = request.getSession();
+        PrintWriter out = response.getWriter();
+        User user = (User)session.getAttribute("u1");
+        if(user != null){
+            arg2.doFilter(request,response);
+        } else{
+
+            //out.println("<script language='javascript'>alert('你还未登录');");
+            //response.setHeader("refresh","3;/login.jsp");
+            //response.sendRedirect("/pages/users/login.jsp");
+            request.getRequestDispatcher("/login.jsp").forward(request,response);
+        }
+    }
+    @Override
+    public void destroy() {
+    }
+}

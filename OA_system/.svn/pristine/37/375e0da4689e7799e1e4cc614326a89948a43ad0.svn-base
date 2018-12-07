@@ -1,0 +1,47 @@
+package com.web;
+
+
+import com.bean.Car;
+import com.github.pagehelper.PageInfo;
+import com.service.CarService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
+
+@Controller
+public class CarController {
+    @Autowired
+    private CarService carService;
+
+    @RequestMapping("/resource/xingzheng/demo2/getcarlist")
+    public String getcarlist(@RequestParam(value="index",defaultValue = "1")int pageindex,
+                             @RequestParam(value="size",defaultValue = "5")int size, ModelMap map){
+        PageInfo pageInfo=carService.getall(pageindex,size);
+        map.put("pa",pageInfo);
+        map.put("size",size);
+        return "/resource/xingzheng/demo2/list";
+    }
+
+    //新增
+    @RequestMapping("/resource/xingzheng/demo2/addcar")
+    public void addcar(Car car, HttpServletResponse resp){
+        int k=carService.insertSelective(car);
+        resp.setContentType("text/html;charset=utf-8");
+        try {
+            PrintWriter out=resp.getWriter();
+            if (k>0){
+                out.print("<script>location.href='/resource/xingzheng/demo2/getcarlist'</script>");
+            }else {
+                out.print("<script>alert('新增失败');location.href='/resource/xingzheng/demo2/add'</script>");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}

@@ -1,0 +1,9 @@
+package com.service;
+
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageInfo;
+
+public interface BooksService {
+
+    PageInfo queryallbooks(int index,int size);
+}

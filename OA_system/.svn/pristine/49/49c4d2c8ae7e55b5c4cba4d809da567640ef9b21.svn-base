@@ -1,0 +1,32 @@
+package com.service;
+
+import com.bean.Document;
+import com.github.pagehelper.PageInfo;
+
+import java.util.List;
+import java.util.Map;
+
+public interface DocumentService {
+
+    int deleteByPrimaryKey(Integer id);
+
+    int insert(Document record);
+
+    int insertSelective(Document record);
+
+    Document selectByPrimaryKey(Integer id);
+
+    int updateByPrimaryKeySelective(Document record);
+
+
+    int updateByPrimaryKey(Document record);
+
+    //模糊查+分页
+    public PageInfo selectall(String name,int pageindex,int size);
+
+    //删除全部
+    int deletein(int[] single);
+
+    //根据id查找
+    Document selectbyid(int id);
+}

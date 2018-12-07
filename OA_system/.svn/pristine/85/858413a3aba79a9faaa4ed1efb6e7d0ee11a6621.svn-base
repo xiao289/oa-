@@ -1,0 +1,217 @@
+package com.web;
+
+import com.bean.*;
+import com.github.pagehelper.PageInfo;
+import com.service.*;
+import com.util.LogUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
+
+@Controller
+public class CBBController {
+    @Autowired
+    private CachetService cachetService;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private DeptService deptService;
+    @Autowired
+    private BooksService booksService;
+    @Autowired
+    private RoleService roleService;
+    @Autowired
+    private VcardService vcardService;
+    @Autowired
+    private LogService logService;
+
+
+    /**
+     * 展示用章添加页面信息
+     * @param modelMap
+     * @param request
+     * @return
+     */
+    @RequestMapping("xingzheng/room/queryallchapter")
+    public String queryallchapter(ModelMap modelMap, HttpServletRequest request){
+        User user1 = (User) request.getSession().getAttribute("loginname");
+
+
+        Dept dept = deptService.selectByPrimaryKey(user1.getDeptid());
+        List list=new ArrayList();
+        list.add(dept);
+        user1.setDepts(list);
+        modelMap.put("loginname",user1);
+        //根据roleid来获取有权限额信息
+        List<User> admin = userService.querybyroleid();
+        modelMap.put("admins",admin);
+        return "/resource/xingzheng/chapter/list";
+    }
+
+    /**
+     * 添加用章管理
+     */
+    @RequestMapping("/xingzheng/chapter/add")
+    public void add(Cachet cachet,HttpServletResponse response,HttpServletRequest request){
+        User user1 = (User) request.getSession().getAttribute("loginname");
+        Log log = LogUtil.setterLog(user1.getLoginname(), null, "添加用章申请");
+        logService.insertSelective(log);
+        int i = cachetService.insert(cachet);
+        response.setContentType("text/html;charset=utf-8");
+        try {
+            PrintWriter writer = response.getWriter();
+            if(i>0){
+                writer.write("<script>alert('添加用章成功');location.href='/resource/myself/demo1/getList'</script>");
+            }else{
+                writer.write("<script>alert('添加用章失败');location.href='xingzheng/room/queryallchapter'</script>");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 展示书籍信息
+     * @param index
+     * @param size
+     * @param modelMap
+     * @return
+     */
+    @RequestMapping("/xingzheng/books/queryallbooks")
+    public String queryallbooks(@RequestParam(value = "index",defaultValue = "1") int index,
+                                @RequestParam(defaultValue = "5") int size,ModelMap modelMap){
+        PageInfo pageInfo = booksService.queryallbooks(index, size);
+        modelMap.put("page",pageInfo);
+        modelMap.put("size",size);
+        return "resource/xingzheng/books/view";
+    }
+
+    /**
+     * 借书前的准备
+     * @param request
+     * @param modelMap
+     * @return
+     */
+    @RequestMapping("/xingzheng/books/rever")
+    public String reser(HttpServletRequest request,ModelMap modelMap){
+        User user1 = (User) request.getSession().getAttribute("loginname");
+        Dept dept = deptService.selectByPrimaryKey(user1.getDeptid());
+        List list=new ArrayList();
+        list.add(dept);
+        user1.setDepts(list);
+        modelMap.put("loginname",user1);
+        //根据roleid来获取有权限额信息
+        List<User> admin = userService.querybyroleid();
+        modelMap.put("admins",admin);
+        //获取到所有的图书信息
+        return "/resource/xingzheng/books/list";
+    }
+
+    /**
+     * 添加名片申请钱的准备
+     * @param request
+     * @param modelMap
+     * @return
+     */
+    @RequestMapping("/xingzheng/card/querycard")
+    public String queryallcard(HttpServletRequest request,ModelMap modelMap){
+        User user1 = (User) request.getSession().getAttribute("loginname");
+        Dept dept = deptService.selectByPrimaryKey(user1.getDeptid());
+        List list=new ArrayList();
+        list.add(dept);
+        user1.setDepts(list);
+        modelMap.put("loginname",user1);
+        //根据roleid来获取有权限额信息
+        List<User> admin = userService.querybyroleid();
+        Role role = roleService.selectByPrimaryKey(1);
+        modelMap.put("admins",admin);
+        modelMap.put("role",role);
+        return "/resource/xingzheng/card/list";
+    }
+
+    /**
+     * 添加名片的预订和流程
+     * @param vcard
+     * @param response
+     */
+    @RequestMapping("/xingzheng/card/addcard")
+    public void addcard(Vcard vcard,HttpServletResponse response,HttpServletRequest request){
+        User user1 = (User) request.getSession().getAttribute("loginname");
+        Log log = LogUtil.setterLog(user1.getLoginname(), null, "添加名片申请");
+        logService.insertSelective(log);
+
+        int i = vcardService.insertSelective(vcard);
+        response.setContentType("text/html;charset=utf-8");
+        try {
+            PrintWriter writer = response.getWriter();
+            if(i>0){
+                writer.write("<script>alert('添加成功');location.href='/resource/myself/demo1/getList'</script>");
+            }else{
+                writer.write("<script>alert('添加失败');location.href='/xingzheng/books/rever'</script>");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 验证图书是否存在和验证是否已经被借阅
+     * @param bookid
+     * @return
+     */
+    @RequestMapping("/xingzheng/books/yanzheng")
+    @ResponseBody
+    public Book yanzheng(String bookid){
+        Book book = booksService.selectByPrimaryKey(bookid);
+        if(book!=null){
+            return book;
+        }else{
+            return null;
+        }
+    }
+
+    /**
+     * 添加书籍并且添加图书预定的流程
+     * @param book
+     * @param startTime
+     * @param endTime
+     * @param response
+     */
+    @RequestMapping("/xingzheng/books/addbook")
+    public void addbook(BookReserve book,String startTime,String endTime,
+                        HttpServletResponse response,HttpServletRequest request){
+        response.setContentType("text/html;charset=utf-8");
+        User user1 = (User) request.getSession().getAttribute("loginname");
+        Log log = LogUtil.setterLog(user1.getLoginname(), null, "添加图书预定");
+        logService.insertSelective(log);
+        try {
+            PrintWriter writer = response.getWriter();
+            //模糊查验证是否已经被预定
+            BookReserve yanzheng = booksService.yanzheng(startTime, endTime,book.getBookid());
+            if(yanzheng!=null){
+                writer.write("<script>alert('此书已经被借阅了');location.href='/xingzheng/card/querycard';</script>");
+            }else{
+                int i = booksService.addbook(book,startTime,endTime);
+                if(i>0){
+                    writer.write("<script>alert('成功');location.href='/resource/myself/demo1/getList'</script>");
+                }else{
+                    writer.write("<script>alert('失败');location.href='/xingzheng/card/querycard'</script>");
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+}

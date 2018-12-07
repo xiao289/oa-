@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.UserMapper">
+  <resultMap id="BaseResultMap" type="com.bean.User">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="loginName" jdbcType="VARCHAR" property="loginname" />
+    <result column="password" jdbcType="VARCHAR" property="password" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="idcard" jdbcType="VARCHAR" property="idcard" />
+    <result column="age" jdbcType="INTEGER" property="age" />
+    <result column="phone" jdbcType="VARCHAR" property="phone" />
+    <result column="sex" jdbcType="INTEGER" property="sex" />
+    <result column="job" jdbcType="VARCHAR" property="job" />
+    <result column="roleId" jdbcType="INTEGER" property="roleid" />
+    <result column="photo" jdbcType="VARCHAR" property="photo" />
+    <result column="orgId" jdbcType="INTEGER" property="orgid" />
+    <result column="deptId" jdbcType="INTEGER" property="deptid" />
+    <result column="state" jdbcType="INTEGER" property="state" />
+    <result column="managerid" property="managerid"></result>
+
+    <association property="role" javaType="com.bean.Role">
+      <id column="id" jdbcType="INTEGER" property="id" />
+      <result column="rolename" jdbcType="VARCHAR" property="name" />
+      <result column="remark" jdbcType="VARCHAR" property="remark" />
+      <result column="state" jdbcType="INTEGER" property="state" />
+    </association>
+    <collection property="organizations" ofType="com.bean.Organization">
+      <id column="id" jdbcType="INTEGER" property="id" />
+      <result column="orgname" jdbcType="VARCHAR" property="name" />
+    </collection>
+    <collection property="depts" ofType="com.bean.Dept">
+      <id column="id" jdbcType="INTEGER" property="id" />
+      <result column="deptname" jdbcType="VARCHAR" property="name" />
+    </collection>
+  </resultMap>
+
+  <select id="selectByLoginname" resultMap="BaseResultMap">
+    select * from user where loginName = #{loginname}
+  </select>
+
+  <select id="findalluser" resultMap="BaseResultMap">
+    SELECT u.* , r.name rolename ,d.name deptname , o.name orgname FROM USER u, role r, dept d, organization o
+    WHERE u.roleId = r.id AND u.orgId = o.id AND u.deptId = d.id
+    <if test="username != null and username != ''">
+      and u.loginName = #{username}
+    </if>
+    <if test="name != null and name != ''">
+      and u.name = #{name}
+    </if>
+    <if test="ids != null and ids != ''">
+      and u.id in (
+      <foreach collection="ids" item="id" separator=",">
+        #{id}
+      </foreach>
+      )
+    </if>
+  </select>
+
+  <!--登陆-->
+  <select id="login" resultType="com.bean.User">
+  select * from user u,role r where u.roleId=r.id and u.loginName=#{loginname}
+</select>
+  <sql id="Base_Column_List">
+    id, loginName, password, name, idcard, age, phone, sex, job, roleId, photo, orgId, 
+    deptId, state
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from user
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from user
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.bean.User">
+    insert into user (id, loginName, password, 
+      name, idcard, age, 
+      phone, sex, job, roleId, 
+      photo, orgId, deptId, 
+      state)
+    values (#{id,jdbcType=INTEGER}, #{loginname,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, 
+      #{name,jdbcType=VARCHAR}, #{idcard,jdbcType=VARCHAR}, #{age,jdbcType=INTEGER}, 
+      #{phone,jdbcType=VARCHAR}, #{sex,jdbcType=INTEGER}, #{job,jdbcType=VARCHAR}, #{roleid,jdbcType=INTEGER}, 
+      #{photo,jdbcType=VARCHAR}, #{orgid,jdbcType=INTEGER}, #{deptid,jdbcType=INTEGER}, 
+      #{state,jdbcType=INTEGER})
+  </insert>
+  <insert id="insertSelective" parameterType="com.bean.User">
+    insert into user
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="loginname != null">
+        loginName,
+      </if>
+      <if test="password != null">
+        password,
+      </if>
+      <if test="name != null">
+        name,
+      </if>
+      <if test="idcard != null">
+        idcard,
+      </if>
+      <if test="age != null">
+        age,
+      </if>
+      <if test="phone != null">
+        phone,
+      </if>
+      <if test="sex != null">
+        sex,
+      </if>
+      <if test="job != null">
+        job,
+      </if>
+      <if test="roleid != null">
+        roleId,
+      </if>
+      <if test="photo != null">
+        photo,
+      </if>
+      <if test="orgid != null">
+        orgId,
+      </if>
+      <if test="deptid != null">
+        deptId,
+      </if>
+      <if test="state != null">
+        state,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="loginname != null">
+        #{loginname,jdbcType=VARCHAR},
+      </if>
+      <if test="password != null">
+        #{password,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null">
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="idcard != null">
+        #{idcard,jdbcType=VARCHAR},
+      </if>
+      <if test="age != null">
+        #{age,jdbcType=INTEGER},
+      </if>
+      <if test="phone != null">
+        #{phone,jdbcType=VARCHAR},
+      </if>
+      <if test="sex != null">
+        #{sex,jdbcType=INTEGER},
+      </if>
+      <if test="job != null">
+        #{job,jdbcType=VARCHAR},
+      </if>
+      <if test="roleid != null">
+        #{roleid,jdbcType=INTEGER},
+      </if>
+      <if test="photo != null">
+        #{photo,jdbcType=VARCHAR},
+      </if>
+      <if test="orgid != null">
+        #{orgid,jdbcType=INTEGER},
+      </if>
+      <if test="deptid != null">
+        #{deptid,jdbcType=INTEGER},
+      </if>
+      <if test="state != null">
+        #{state,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.bean.User">
+    update user
+    <set>
+      <if test="loginname != null">
+        loginName = #{loginname,jdbcType=VARCHAR},
+      </if>
+      <if test="password != null">
+        password = #{password,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null">
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="idcard != null">
+        idcard = #{idcard,jdbcType=VARCHAR},
+      </if>
+      <if test="age != null">
+        age = #{age,jdbcType=INTEGER},
+      </if>
+      <if test="phone != null">
+        phone = #{phone,jdbcType=VARCHAR},
+      </if>
+      <if test="sex != null">
+        sex = #{sex,jdbcType=INTEGER},
+      </if>
+      <if test="job != null">
+        job = #{job,jdbcType=VARCHAR},
+      </if>
+      <if test="roleid != null">
+        roleId = #{roleid,jdbcType=INTEGER},
+      </if>
+      <if test="photo != null">
+        photo = #{photo,jdbcType=VARCHAR},
+      </if>
+      <if test="orgid != null">
+        orgId = #{orgid,jdbcType=INTEGER},
+      </if>
+      <if test="deptid != null">
+        deptId = #{deptid,jdbcType=INTEGER},
+      </if>
+      <if test="state != null">
+        state = #{state,jdbcType=INTEGER},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.bean.User">
+    update user
+    set loginName = #{loginname,jdbcType=VARCHAR},
+      password = #{password,jdbcType=VARCHAR},
+      name = #{name,jdbcType=VARCHAR},
+      idcard = #{idcard,jdbcType=VARCHAR},
+      age = #{age,jdbcType=INTEGER},
+      phone = #{phone,jdbcType=VARCHAR},
+      sex = #{sex,jdbcType=INTEGER},
+      job = #{job,jdbcType=VARCHAR},
+      roleId = #{roleid,jdbcType=INTEGER},
+      photo = #{photo,jdbcType=VARCHAR},
+      orgId = #{orgid,jdbcType=INTEGER},
+      deptId = #{deptid,jdbcType=INTEGER},
+      state = #{state,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

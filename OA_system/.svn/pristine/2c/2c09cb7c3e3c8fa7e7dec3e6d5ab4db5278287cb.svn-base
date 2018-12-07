@@ -1,0 +1,17 @@
+package com.dao;
+
+import com.bean.Leavex;
+
+public interface LeavexMapper {
+    int deleteByPrimaryKey(Integer id);
+
+    int insert(Leavex record);
+
+    int insertSelective(Leavex record);
+
+    Leavex selectByPrimaryKey(Integer id);
+
+    int updateByPrimaryKeySelective(Leavex record);
+
+    int updateByPrimaryKey(Leavex record);
+}

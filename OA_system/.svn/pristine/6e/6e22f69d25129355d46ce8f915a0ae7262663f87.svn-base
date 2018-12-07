@@ -1,0 +1,182 @@
+package com.web;
+
+import com.bean.Room;
+import com.bean.RoomReserve;
+import com.bean.User;
+import com.github.pagehelper.PageInfo;
+import com.service.RoomReserveService;
+import com.service.RoomService;
+import com.util.RoomReserveExcelUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+
+@Controller
+public class RoomReserveController {
+    @Autowired
+    private RoomReserveService roomReserveService;
+    @Autowired
+    private RoomService roomService;
+
+
+    /**
+     * 展示所有的会议室预定信息，还有模糊查功能
+     * @param index
+     * @param size
+     * @param roomname
+     * @param yuname
+     * @param type
+     * @param modelMap
+     * @return
+     */
+    @RequestMapping("/xingzheng/room/queryallreserve")
+    public String queryallreserve(@RequestParam(value = "index",defaultValue = "1") int index,
+                                  @RequestParam(defaultValue = "5") int size,
+                                  String roomname,String yuname,
+                                  String starttime,String endtime,
+                                  @RequestParam(value = "type",defaultValue = "-1") int type,
+                                  ModelMap modelMap){
+        PageInfo queryall = roomReserveService.queryall(index,size,roomname,yuname,type,starttime,endtime);
+        modelMap.put("size",size);
+        modelMap.put("page",queryall);
+        modelMap.put("roomname",roomname);
+        modelMap.put("yuname",yuname);
+        modelMap.put("type",type);
+        modelMap.put("starttime",starttime);
+        modelMap.put("endtime",endtime);
+        return "/resource/xingzheng/room/relist";
+    }
+
+
+    /**
+     * 批量删除预约信息
+     * @param reserveids
+     * @param response
+     */
+    @RequestMapping("/xingzheng/room/yudingdeleteall")
+    public void deteleall(int[] reserveids, HttpServletResponse response){
+        int i = roomReserveService.deletemany(reserveids);
+        response.setContentType("text/html;charset=utf-8");
+        try {
+            PrintWriter writer = response.getWriter();
+            if(i>0){
+                writer.write("<script>alert('取消预约成功');location.href='/xingzheng/room/queryallreserve'</script>");
+            }else{
+                writer.write("<script>alert('取消预约失败');location.href='/xingzheng/room/queryallreserve'</script>");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 批量导出预定会议室的信息
+     * @param reserveids
+     * @param response
+     */
+    @RequestMapping("/xingzheng/room/yudingdaochu")
+    public void daochu(int[] reserveids,HttpServletResponse response){
+        List<Room> querynany = roomReserveService.querynany(reserveids);
+        RoomReserveExcelUtil.headers=new String[]{"预定编号","会议室名称","会议室起始时间","会议室结束时间","会议室用途","批准人","预订人","预定时间"};
+        RoomReserveExcelUtil.cellcount=7;
+        RoomReserveExcelUtil.createhead(7);
+        RoomReserveExcelUtil.createother(querynany);
+        SimpleDateFormat simpleFormatter=new SimpleDateFormat("yyyyMMddhhmmss");
+        String date=simpleFormatter.format(new Date());
+
+        FileOutputStream outputStream=null;
+        try {
+            outputStream=new FileOutputStream("G:"+date+".xls");
+            RoomReserveExcelUtil.export(outputStream);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }finally {
+            try {
+                outputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        response.setContentType("text/html;charset=utf-8");
+        try {
+            PrintWriter writer = response.getWriter();
+            writer.write("<script>alert('导出成功');location.href='/xingzheng/room/queryallreserve'</script>");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 预定会议室前的准备
+     * @param index
+     * @param size
+     * @param starttime
+     * @param endtime
+     * @param modelMap
+     * @return
+     */
+    @RequestMapping("/xingzheng/room/yuding")
+    public String yuding(@RequestParam(value = "index",defaultValue = "1") int index,
+                         @RequestParam(defaultValue = "5") int size,
+                         String starttime,String endtime,ModelMap modelMap){
+        //1、获取所有的room信息
+        PageInfo queryall = roomService.queryall(index,size);
+        modelMap.put("page",queryall);
+        modelMap.put("size",size);
+        //2、获取所有的有权限的角色信息
+        List<User> userList = roomReserveService.queryuserbyrole();
+        modelMap.put("users",userList);
+        return "/resource/xingzheng/room/yuding";
+    }
+
+    /**
+     * 批量添加会议室预约信息
+     * @param roomReserve
+     * @param response
+     */
+    @RequestMapping("/resource/xingzheng/room/addyuding")
+    public void addyuding(RoomReserve roomReserve, String startTime,
+                          String endTime, int[] roomids,
+                          HttpServletResponse response, HttpServletRequest request){
+        User user = (User) request.getSession().getAttribute("loginname");
+        List queryallbytime = roomReserveService.queryallbytime(startTime,endTime);
+        response.setContentType("text/html;charset=utf-8");
+        try {
+            PrintWriter writer =response.getWriter();
+            if(queryallbytime==null){
+                roomReserve.setReservetime(new Date());
+                int i = roomReserveService.addall(roomReserve,roomids,startTime,endTime,user);
+                if(i>0){
+                        writer.write("<script>alert('添加预约成功');location.href='/xingzheng/room/queryallreserve'</script>");
+                    }else{
+                        writer.write("<script>alert('添加预约失败');location.href='/xingzheng/room/queryallreserve'</script>");
+                    }
+                }else{
+                writer.write("<script>alert('已被占用,请重新选择');location.href='/xingzheng/room/queryallreserve'</script>");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
+
+
+
+
+
+}

@@ -1,0 +1,69 @@
+package com.service.impl;
+
+import com.bean.Log;
+import com.bean.User;
+import com.dao.LogMapper;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import com.service.LogService;
+import com.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@Service
+public class LogServiceImpl implements LogService {
+    @Autowired
+    private LogMapper logMapper;
+    @Autowired
+    private UserService userService;
+    @Override
+    public int deleteByPrimaryKey(Integer id) {
+        return 0;
+    }
+
+    @Override
+    public int insert(Log record) {
+
+        return logMapper.insert(record);
+    }
+
+    @Override
+    public int insertSelective(Log record) {
+        String username = record.getUsername();
+        User user = userService.selectByusername(username);
+        String rolename = user.getRole().getName();
+        record.setRolename(rolename);
+        return logMapper.insertSelective(record);
+    }
+
+    @Override
+    public Log selectByPrimaryKey(Integer id) {
+        return null;
+    }
+
+    @Override
+    public int updateByPrimaryKeySelective(Log record) {
+        return 0;
+    }
+
+    @Override
+    public int updateByPrimaryKey(Log record) {
+        return 0;
+    }
+
+    @Override
+    public PageInfo findalllog(int pagesize, int size, String usern, String shijian1,String shijian2) {
+        PageHelper.startPage(pagesize,size);
+        Map map = new HashMap();
+        map.put("username",usern);
+        map.put("date1",shijian1);
+        map.put("date2",shijian2);
+        List<Log> list = logMapper.findalllog(map);
+        PageInfo pageInfo = new PageInfo(list);
+        return pageInfo;
+    }
+}

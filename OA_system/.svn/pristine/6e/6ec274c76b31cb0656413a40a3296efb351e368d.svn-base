@@ -1,0 +1,96 @@
+package com.service.impl;
+
+import com.bean.User;
+import com.bean.Vcard;
+import com.dao.UserMapper;
+import com.dao.VcardMapper;
+import com.service.VcardService;
+import org.activiti.engine.*;
+import org.activiti.engine.repository.Deployment;
+import org.activiti.engine.runtime.ProcessInstance;
+import org.activiti.engine.task.Task;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@Service
+public class VcardServiceImpl implements VcardService {
+
+    @Autowired
+    private VcardMapper vcardMapper;
+    @Autowired
+    private RepositoryService repositoryService;
+    @Autowired
+    private RuntimeService runtimeService;
+    @Autowired
+    private TaskService taskService;
+    @Autowired
+    private FormService formService;
+    @Autowired
+    private HistoryService historyService;
+    @Autowired
+    private UserMapper userMapper;
+    @Override
+    public int deleteByPrimaryKey(Integer id) {
+        return 0;
+    }
+
+    @Override
+    public int insert(Vcard record) {
+        return vcardMapper.insert(record);
+    }
+
+    @Override
+    public int insertSelective(Vcard record) {
+        //1、启动图书预定的流程
+        //判断部署是否存在，存在则不添加新的
+        List<Deployment> list1 = repositoryService.createDeploymentQuery().list();
+        int k=1;
+        for (Deployment deployment : list1) {
+            if("名片申请".equals(deployment.getName())){
+                k=2;
+            }
+        }
+        if(k==1){
+            repositoryService.createDeployment()
+                    .addClasspathResource("/activeti/cardact.bpmn")
+                    .addClasspathResource("/activeti/cardact.png").name("名片申请")
+                    .deploy();
+        }
+        int i = vcardMapper.insert(record);
+        String business="vcard"+record.getId();
+        Map map=new HashMap();
+        map.put("busid",business);
+        User user = userMapper.selectByPrimaryKey(record.getUserid());
+        map.put("user",user.getName());
+        ProcessInstance reserve = runtimeService.startProcessInstanceByKey("vcard", business, map);
+        //查询流程实例的id查询任务对象
+        Task task = taskService.createTaskQuery().processInstanceId(reserve.getId()).singleResult();
+        //完成个人任务
+        record.setTaskid(Integer.parseInt(task.getId()));
+        vcardMapper.updateByPrimaryKeySelective(record);
+        Map map1=new HashMap();
+        User admin1 = userMapper.selectByPrimaryKey(record.getAdminid());
+        map1.put("admin",admin1.getName());
+        taskService.complete(task.getId(),map1);
+        return i;
+    }
+
+    @Override
+    public Vcard selectByPrimaryKey(Integer id) {
+        return null;
+    }
+
+    @Override
+    public int updateByPrimaryKeySelective(Vcard record) {
+        return 0;
+    }
+
+    @Override
+    public int updateByPrimaryKey(Vcard record) {
+        return 0;
+    }
+}

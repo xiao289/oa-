@@ -1,0 +1,435 @@
+package com.web;
+
+import com.bean.Document;
+import com.github.pagehelper.PageInfo;
+import com.service.DocumentService;
+import com.util.DocumentExcelUtil;
+import org.apache.commons.io.FileUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+@Controller
+@SessionAttributes({"list"})
+public class DocumentController {
+
+    @Autowired
+    private DocumentService documentService;
+
+    /**
+     * 查询+模糊查
+     *
+     * @param name1
+     * @param pageindex
+     * @param map
+     * @param size
+     * @return
+     */
+    @RequestMapping("/resource/wendang/demo1/selectlist")
+    public String selectlist(String name1, Integer pid,
+                             @RequestParam(value = "index", defaultValue = "1") int pageindex,
+                             ModelMap map,
+                             @RequestParam(value = "size", defaultValue = "3") int size) {
+        //设置分页
+        PageInfo pageInfo = documentService.selectall(name1, null, pageindex, size);
+        List<Document> list = pageInfo.getList();
+        ArrayList list1 = new ArrayList();
+
+        for (Document document : list) {
+            if (document.getPid() == -1) {
+                ArrayList arrayList = new ArrayList();
+                for (Document document1 : list) {
+                    if (document1.getPid() == document.getId()) {
+                        arrayList.add(document1);
+                    }
+                }
+                document.setLowd(arrayList);
+                list1.add(document);
+            }
+        }
+        pageInfo.setList(list1);
+        pageInfo.setPageSize(size);
+        map.put("name1", name1);
+        map.put("pid", pid);
+        map.put("pi", pageInfo);
+        return "/resource/wendang/demo1/list";
+    }
+
+    /**
+     * 根据id查找
+     *
+     * @param map
+     * @param document
+     * @return
+     */
+    @RequestMapping("/resource/wendang/demo1/selectbyid")
+    public String selectbyid(ModelMap map, Document document) {
+        Document document1 = documentService.selectbyid(document.getId());
+        map.put("d1", document1);
+        return "resource/wendang/demo1/edit";
+    }
+
+    /**
+     * 修改list主页面
+     *
+     * @param resp
+     * @param document
+     */
+    @RequestMapping("/resource/wendang/demo1/update")
+    public void update(HttpServletResponse resp, Document document) {
+        int k = documentService.updateByPrimaryKeySelective(document);
+        resp.setContentType("text/html;charset=utf-8");
+        try {
+            PrintWriter out = resp.getWriter();
+            if (k > 0) {
+                out.write("<script>alert('修改成功');location.href='/resource/wendang/demo1/selectlist'</script>");
+            } else {
+                out.write("<script>alert('修改失败');location.href='/resource/wendang/demo1/selectbyid'</script>");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 批量删除
+     * 文档改变状态进入回收站列表
+     * isdelete=1
+     *
+     * @param single
+     * @return
+     */
+    @RequestMapping("/resource/wendang/demo1/upp")
+    public void upp(int[] single, HttpServletResponse response) {
+        int i = documentService.updatein(single);
+        response.setContentType("text/html;charset=utf-8");
+        try {
+            PrintWriter out = response.getWriter();
+            if (i > 0) {
+                out.print("<script>alert('删除成功');location.href='/resource/wendang/demo1/selectlist';</script>");
+            } else {
+                out.print("<script>alert('删除失败');location.href='/resource/wendang/demo1/selectlist';</script>");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
+     * 一级添加
+     *
+     * @param document
+     * @return
+     */
+    @RequestMapping("/resource/wendang/demo1/insert")
+    public String addtonggao(Document document) {
+        documentService.insertSelective(document);
+        return "redirect:/resource/wendang/demo1/selectlist";
+    }
+
+    //批量导出
+    @RequestMapping("/resource/wendang/demo1/daochu")
+    public void daochu(int[] single, HttpServletResponse response,
+                       @RequestParam(value = "index", defaultValue = "1") int pageindex,
+                       @RequestParam(value = "size", defaultValue = "3") int size) {
+        PageInfo pg = documentService.selectall(null, single, pageindex, size);
+        List<Document> list = pg.getList();
+        for (Document document : list) {
+            System.out.println(document.getId() + document.getName1() + document.getStarttime() + "**************");
+        }
+        DocumentExcelUtil.headers = new String[]{"文件夹名称", "类型", "用户名", "创建时间", "备注"};
+        DocumentExcelUtil.createhead(5);
+        DocumentExcelUtil.createother(list);
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddhhmmss");
+        String date = simpleDateFormat.format(new Date());
+        FileOutputStream out = null;
+        try {
+            out = new FileOutputStream("f:\\document" + date + ".xls");
+            DocumentExcelUtil.export(out);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                out.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        response.setContentType("text/html;charset=utf-8");
+        try {
+            PrintWriter out2 = response.getWriter();
+            out2.print("<script>alert('导出成功');location.href='/resource/wendang/demo1/selectlist'</script>");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 二级菜单查询
+     *
+     * @param name1
+     * @param pageindex
+     * @param map
+     * @param size
+     * @return
+     */
+    @RequestMapping("/resource/wendang/demo1/secondsel")
+    public String chaxun(String name1, Integer id, Integer pid, HttpServletRequest request,
+                         @RequestParam(value = "index", defaultValue = "1") int pageindex,
+                         ModelMap map,
+                         @RequestParam(value = "size", defaultValue = "300") int size) {
+        //设置分页
+        PageInfo pageInfo = documentService.Dselect(id, name1, null, pageindex, size);
+        ServletContext application = request.getSession().getServletContext();
+        application.setAttribute("id", id);
+        pageInfo.setPageSize(size);
+        map.put("id", id);
+        map.put("pid", pid);
+        map.put("name1", name1);
+        System.out.println(name1 + "Controller");
+        map.put("pi", pageInfo);
+        return "/resource/wendang/demo1/list1";
+    }
+
+    /**
+     * 二级菜单的修改
+     *
+     * @param resp
+     * @param document
+     */
+    @RequestMapping("/resource/wendang/demo1/update2")
+    public void update2(HttpServletResponse resp, Document document) {
+        int k = documentService.updateByPrimaryKeySelective(document);
+        resp.setContentType("text/html;charset=utf-8");
+        try {
+            PrintWriter out = resp.getWriter();
+            if (k > 0) {
+                out.write("<script>alert('修改成功');location.href='/resource/wendang/demo1/secondsel';</script>");
+            } else {
+                out.write("<script>alert('修改失败');top.location.href='/resource/wendang/demo1/secondsel'</script>");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 二级菜单删除
+     *
+     * @param single
+     * @param response
+     */
+
+    @RequestMapping("/resource/wendang/demo1/updat")
+    public void updat(int[] single, int id, String shangjiid, HttpServletResponse response) {
+        int i = documentService.updatein(single);
+
+        response.setContentType("text/html;charset=utf-8");
+        try {
+            PrintWriter out = response.getWriter();
+
+            for (int k = 0; k < single.length; k++) {
+                if (i > 0) {
+                    out.print("<script>alert('删除成功');location.href='/resource/wendang/demo1/secondsel?pid=" + single[k] + "&id="+id+"';</script>");
+                } else {
+                    out.print("<script>alert('删除失败');location.href='/resource/wendang/demo1/secondsel?pid=" + single[k] + "&id="+id+"';</script>");
+                }
+            }
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+
+    /***************************************************************/
+    /**
+     * 查询
+     *
+     * @param map
+     * @return
+     */
+    @RequestMapping("/resource/wendang/demo1/sl")
+    public String sl(ModelMap map) {
+        List list = documentService.selectalltoup();
+        map.put("list", list);
+        for (Object o : list) {
+            System.out.println(o.toString());
+        }
+        return "/resource/wendang/demo1/add1";
+    }
+
+    /**
+     * 上传文件
+     *
+     * @param myfile
+     * @param request
+     * @return
+     */
+    @RequestMapping("/resource/wendang/demo1/toupload")
+    public String upload(@RequestParam(value = "uploadpath", required = false) MultipartFile myfile, Document document,
+                         HttpServletRequest request) {
+        String path = request.getRealPath("/resource");
+        try {
+            myfile.transferTo(new File(path + "/" + myfile.getOriginalFilename()));//复制
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        request.setAttribute("filename", myfile.getOriginalFilename());
+
+        String url = path + "/" + myfile.getOriginalFilename();
+        //取得最后一个/的下标
+        int index = url.lastIndexOf(".");
+        //将字符串转为字符数组
+        char[] ch = url.toCharArray();
+        //根据 copyValueOf(char[] data, int offset, int count) 取得最后一个字符串
+        String type = String.copyValueOf(ch, index + 1, ch.length - index - 1);
+
+        System.out.println(url + "*********************");
+        document.setType(type);
+        document.setUrl(url);
+        documentService.insertSelective(document);
+        return "redirect:/resource/wendang/demo1/selectlist";
+    }
+
+
+    /**
+     * 下载
+     *
+     * @param fname
+     * @param request
+     * @return
+     */
+    @RequestMapping("/resource/wendang/demo1/down1")
+    public ResponseEntity<byte[]> down(String fname, HttpServletRequest request){
+        String path=request.getRealPath("/resource");
+        File f=new File(path+"/"+fname);
+        System.out.println(path+"/"+fname);
+        ResponseEntity<byte[]> rsp= null;
+        try {
+            //设置响应的头信息
+            HttpHeaders httpHeaders=new HttpHeaders();
+            httpHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            httpHeaders.setContentDispositionFormData("vtyvyt", URLEncoder.encode(fname,"utf-8"));
+
+            rsp = new ResponseEntity<byte[]>(FileUtils.readFileToByteArray(f),httpHeaders, HttpStatus.CREATED);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return rsp;
+    }
+
+
+
+
+    //批量导出
+    @RequestMapping("/resource/wendang/demo1/daochu1")
+    public void daochu1(int[] single, int id , HttpServletResponse response, ModelMap map, Document document,
+                        @RequestParam(value="index", defaultValue = "1") int pageindex,
+                        @RequestParam(value="size",defaultValue = "3") int size){
+        PageInfo pg = documentService.selectall1(null,single,pageindex,size);
+        for (int i : single) {
+            System.out.println(i+"********************************");
+        }
+        List<Document> list = pg.getList();
+        for (Document document1 : list) {
+            System.out.println(document.getId()+document.getName1()+document.getStarttime()+"**************");
+        }
+        DocumentExcelUtil.headers=new String[]{"文件夹名称","类型","用户名","创建时间","备注"};
+        DocumentExcelUtil.createhead(5);
+        DocumentExcelUtil.createother(list);
+        SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyyMMddhhmmss");
+        String date= simpleDateFormat.format(new Date());
+        FileOutputStream out= null;
+        try {
+            out = new FileOutputStream("f:\\document"+date+".xls");
+            DocumentExcelUtil.export(out);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }finally{
+            try {
+                out.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        response.setContentType("text/html;charset=utf-8");
+        try {
+            PrintWriter out2=response.getWriter();
+            out2.print("<script>alert('导出成功');location.href='/resource/wendang/demo1/selectlist?id="+id+"';</script>");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 文档回收站查询
+     * @param map
+     * @return
+     */
+    @RequestMapping("/resource/wendang/demo1/huishousel")
+    public String huishousel(@RequestParam(value="index", defaultValue = "1") int pageindex,
+                             ModelMap map,
+                             @RequestParam(value="size",defaultValue = "3") int size){
+        //设置分页
+        PageInfo pageInfo=documentService.hssel(null,pageindex,size);
+        pageInfo.setPageSize(size);
+        map.put("pi",pageInfo);
+        return "/resource/wendang/demo2/list";
+    }
+
+    /**
+     * 文档回收站批量删除
+     * 文档改变状态进入回收站列表
+     * isdelete=1
+     * @param single
+     * @return
+     */
+    @RequestMapping("/resource/wendang/demo1/deletein")
+    public void deletein(int[] single, HttpServletResponse response) {
+        int i = documentService.deletein(single);
+        response.setContentType("text/html;charset=utf-8");
+        try {
+            PrintWriter out = response.getWriter();
+            if (i > 0) {
+                out.print("<script>alert('删除成功');location.href='/resource/wendang/demo1/huishousel';</script>");
+            } else {
+                out.print("<script>alert('删除失败');location.href='/resource/wendang/demo1/huishousel';</script>");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    //还原状态
+    @RequestMapping("/resource/wendang/demo1/huanyuan")
+    public String upp(Document document){
+        documentService.updateByPrimaryKeySelective(document);
+        return "redirect:/resource/wendang/demo1/huishousel";
+    }
+
+}

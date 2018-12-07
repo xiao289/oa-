@@ -1,0 +1,45 @@
+package com.service.impl;
+
+import com.bean.Income;
+import com.dao.IncomeMapper;
+import com.service.IncomeService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+
+@Service
+public class IncomeServiceImpl implements IncomeService {
+
+    @Autowired
+    private IncomeMapper incomeMapper;
+
+    @Override
+    public int deleteByPrimaryKey(Integer id) {
+        return 0;
+    }
+
+    @Override
+    public int insert(Income record) {
+        return 0;
+    }
+
+    @Override
+    public int insertSelective(Income record) {
+        return incomeMapper.insertSelective(record);
+    }
+
+    @Override
+    public Income selectByPrimaryKey(Integer id) {
+        return null;
+    }
+
+    @Override
+    public int updateByPrimaryKeySelective(Income record) {
+        return 0;
+    }
+
+    @Override
+    public int updateByPrimaryKey(Income record) {
+        return 0;
+    }
+}

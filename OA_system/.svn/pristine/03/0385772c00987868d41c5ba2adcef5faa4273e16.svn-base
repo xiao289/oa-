@@ -1,0 +1,73 @@
+package com.service.impl;
+
+import com.bean.User;
+import com.dao.UserMapper;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import com.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@Service
+public class UserServiceImpl implements UserService {
+    @Autowired
+    private UserMapper userMapper;
+
+    @Override
+    public int deleteByPrimaryKey(Integer id) {
+        return 0;
+    }
+
+    @Override
+    public int insert(User record) {
+        return 0;
+    }
+
+    @Override
+    public int insertSelective(User record) {
+        return 0;
+    }
+
+    @Override
+    public User selectByPrimaryKey(Integer id) {
+        return userMapper.selectByPrimaryKey(id);
+    }
+
+    @Override
+    public int updateByPrimaryKeySelective(User record) {
+        return 0;
+    }
+
+    @Override
+    public int updateByPrimaryKey(User record) {
+        return 0;
+    }
+
+    @Override
+    public User login(User user) {
+        User user1= userMapper.login(user.getLoginname());
+        if(user1 !=null && user1.getPassword().equals(user.getPassword())){
+
+            return user1;
+        }else {
+            return null;
+        }
+
+    }
+
+
+    @Override
+    public PageInfo findalluser(String username, String name, int pageindex, int size) {
+        Map map = new HashMap();
+        map.put("username",username);
+        map.put("name",name);
+        List<User> list = userMapper.findalluser(map);
+        PageHelper.startPage(pageindex,size);
+        PageInfo pageInfo = new PageInfo(list);
+        return pageInfo;
+    }
+}

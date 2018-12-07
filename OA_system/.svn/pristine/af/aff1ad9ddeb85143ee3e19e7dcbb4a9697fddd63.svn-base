@@ -1,0 +1,31 @@
+package com.service.impl;
+
+import com.bean.Book;
+import com.bean.BookReserve;
+import com.dao.BookMapper;
+import com.dao.BookReserveMapper;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import com.service.BooksService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class BooksServiceImpl implements BooksService {
+
+    @Autowired
+    private BookMapper bookMapper;
+    @Autowired
+    private BookReserveMapper bookReserveMapper;
+
+
+    @Override
+    public PageInfo queryallbooks(int index, int size) {
+        PageHelper.startPage(index,size);
+        List<Book> queryallbooks = bookMapper.queryallbooks();
+        PageInfo<Book> pageInfo=new PageInfo<>(queryallbooks);
+        return pageInfo;
+    }
+}

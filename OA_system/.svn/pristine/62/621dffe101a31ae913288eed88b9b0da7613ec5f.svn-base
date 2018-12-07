@@ -1,0 +1,31 @@
+package com.service;
+
+import com.bean.User;
+import com.github.pagehelper.PageInfo;
+
+import java.util.List;
+
+public interface UserService {
+    int deleteByPrimaryKey(Integer id);
+
+    int insert(User record);
+
+    int insertSelective(User record);
+
+    User selectByPrimaryKey(Integer id);
+
+    int updateByPrimaryKeySelective(User record);
+
+    int updateByPrimaryKey(User record);
+    //登陆
+    public User login(User user);
+
+    PageInfo findalluser(String username, String name, int pageindex, int size, int[] ids);
+
+    User selectByLoginname(String loginname);
+
+    List<User> querybyroleid(int roleid);
+
+    int deleteByArray(int[] ids);
+
+}

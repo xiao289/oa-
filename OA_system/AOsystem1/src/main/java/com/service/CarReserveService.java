@@ -1,0 +1,24 @@
+package com.service;
+
+import com.bean.CarReserve;
+
+import java.util.List;
+
+public interface CarReserveService {
+    int deleteByPrimaryKey(Integer id);
+
+    int insert(CarReserve record);
+
+    int insertSelective(CarReserve record);
+
+    CarReserve selectByPrimaryKey(Integer id);
+
+    int updateByPrimaryKeySelective(CarReserve record);
+
+    int updateByPrimaryKey(CarReserve record);
+
+    public List check(String carid);
+
+    //    修改状态
+    int updatestate(Integer id,int state);
+}
